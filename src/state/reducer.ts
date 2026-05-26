@@ -3,7 +3,12 @@ import { nextColorSlot } from '../data/personColors';
 import { PERIOD_A_META, PERIOD_B_META } from '../data/periods';
 import { RECIPES } from '../data/recipes';
 import { migrateAppState } from '../domain/migrate';
-import { buildPeriod, rerollMeal } from '../domain/picker';
+import {
+  buildPeriodFromPicker,
+  buildPlanFromPicks,
+  rerollMeal,
+} from '../domain/picker';
+import type { MealPicks } from '../domain/mealPicks';
 import type {
   AppState,
   Person,
@@ -14,6 +19,7 @@ import type {
 
 export type Action =
   | { type: 'GENERATE_PLAN' }
+  | { type: 'GENERATE_PLAN_WITH_PICKS'; payload: MealPicks }
   | { type: 'REROLL_MEAL'; payload: { periodKey: PeriodKey; mealType: MealType } }
   | { type: 'TOGGLE_LOCK'; payload: { periodKey: PeriodKey; mealType: MealType } }
   | { type: 'SET_ACTIVE_TAB'; payload: 'plan' | 'shop' }
@@ -52,13 +58,13 @@ export const initialState: AppState = {
 function buildFullPlan(state: AppState): Plan {
   const existing = state.plan;
   return {
-    A: buildPeriod(
+    A: buildPeriodFromPicker(
       PERIOD_A_META,
       existing?.A.meals ?? null,
       state.people,
       RECIPES,
     ),
-    B: buildPeriod(
+    B: buildPeriodFromPicker(
       PERIOD_B_META,
       existing?.B.meals ?? null,
       state.people,
@@ -71,6 +77,18 @@ export function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
     case 'GENERATE_PLAN':
       return { ...state, plan: buildFullPlan(state), checkedShopping: {} };
+
+    case 'GENERATE_PLAN_WITH_PICKS':
+      return {
+        ...state,
+        plan: buildPlanFromPicks(
+          state.plan,
+          state.people,
+          RECIPES,
+          action.payload,
+        ),
+        checkedShopping: {},
+      };
 
     case 'REROLL_MEAL': {
       if (!state.plan) return state;

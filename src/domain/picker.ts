@@ -1,4 +1,6 @@
 import { MEAL_TYPES } from '../data/constants';
+import { PERIOD_A_META, PERIOD_B_META } from '../data/periods';
+import type { MealPicks } from './mealPicks';
 import type {
   Person,
   Recipe,
@@ -9,6 +11,8 @@ import type {
   Exclusion,
   MealSlot,
 } from './types';
+
+export type { MealPicks } from './mealPicks';
 
 export type PeriodMeta = Pick<
   Period,
@@ -60,13 +64,29 @@ export function pickRecipe(
   return pool[idx];
 }
 
-export function buildPeriod(
+function resolvePickedRecipe(
+  pickId: string | undefined,
+  mealType: MealType,
+  people: Person[],
+  recipeById: Map<string, Recipe>,
+): Recipe | null {
+  if (!pickId) return null;
+  const candidate = recipeById.get(pickId);
+  if (!candidate || candidate.meal !== mealType) return null;
+  const excludes = allExcludes(people);
+  if (isExcluded(candidate, excludes)) return null;
+  return candidate;
+}
+
+function buildPeriod(
   meta: PeriodMeta,
   existingMeals: Period['meals'] | null,
   people: Person[],
   recipes: Recipe[],
+  periodPicks: Partial<Record<MealType, string>>,
+  used: Set<string>,
+  recipeById: Map<string, Recipe>,
 ): Period {
-  const used = new Set<string>();
   const meals = {} as Period['meals'];
 
   for (const mealType of MEAL_TYPES) {
@@ -79,12 +99,65 @@ export function buildPeriod(
 
   for (const mealType of MEAL_TYPES) {
     if (meals[mealType]) continue;
-    const recipe = pickRecipe(mealType, used, people, recipes);
+
+    const picked = resolvePickedRecipe(
+      periodPicks[mealType],
+      mealType,
+      people,
+      recipeById,
+    );
+    const recipe =
+      picked && !used.has(picked.id)
+        ? picked
+        : pickRecipe(mealType, used, people, recipes);
+
     used.add(recipe.id);
     meals[mealType] = { recipe, locked: false };
   }
 
   return { ...meta, meals };
+}
+
+export function buildPeriodFromPicker(
+  meta: PeriodMeta,
+  existingMeals: Period['meals'] | null,
+  people: Person[],
+  recipes: Recipe[],
+): Period {
+  const used = new Set<string>();
+  const recipeById = new Map(recipes.map((r) => [r.id, r]));
+  return buildPeriod(meta, existingMeals, people, recipes, {}, used, recipeById);
+}
+
+export function buildPlanFromPicks(
+  existingPlan: Plan | null,
+  people: Person[],
+  recipes: Recipe[],
+  picks: MealPicks,
+): Plan {
+  const used = new Set<string>();
+  const recipeById = new Map(recipes.map((r) => [r.id, r]));
+
+  return {
+    A: buildPeriod(
+      PERIOD_A_META,
+      existingPlan?.A.meals ?? null,
+      people,
+      recipes,
+      picks.A ?? {},
+      used,
+      recipeById,
+    ),
+    B: buildPeriod(
+      PERIOD_B_META,
+      existingPlan?.B.meals ?? null,
+      people,
+      recipes,
+      picks.B ?? {},
+      used,
+      recipeById,
+    ),
+  };
 }
 
 export function rerollMeal(

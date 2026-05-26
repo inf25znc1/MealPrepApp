@@ -2,7 +2,7 @@ import { MEAL_TYPES } from '../data/constants';
 import { PERSON_COLOR_COUNT } from '../data/personColors';
 import { PERIOD_A_META, PERIOD_B_META } from '../data/periods';
 import { RECIPES } from '../data/recipes';
-import { buildPeriod } from './picker';
+import { buildPeriodFromPicker } from './picker';
 import type { AppState, Period } from './types';
 
 function migrateCheckedShopping(state: AppState): AppState {
@@ -59,13 +59,13 @@ export function migrateAppState(state: AppState): AppState {
   return {
     ...withColors,
     plan: {
-      A: buildPeriod(
+      A: buildPeriodFromPicker(
         PERIOD_A_META,
         withColors.plan.A.meals,
         withColors.people,
         RECIPES,
       ),
-      B: buildPeriod(
+      B: buildPeriodFromPicker(
         PERIOD_B_META,
         withColors.plan.B.meals,
         withColors.people,

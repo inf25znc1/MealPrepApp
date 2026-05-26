@@ -13,6 +13,7 @@ export const ui = {
   tabShopping: 'Покупки',
 
   generateWeek: 'Згенерувати тиждень',
+  generateWeekLoading: 'Підбираємо страви…',
   planEmpty: 'Натисніть «Згенерувати тиждень» нижче, щоб спланувати страви.',
   shoppingEmpty: 'Згенеруйте тиждень, щоб побачити список покупок.',
   shoppingIntro: (n: number) =>
