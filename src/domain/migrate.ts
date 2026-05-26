@@ -1,33 +1,57 @@
 import { MEAL_TYPES } from '../data/constants';
+import { PERSON_COLOR_COUNT } from '../data/personColors';
 import { PERIOD_A_META, PERIOD_B_META } from '../data/periods';
 import { RECIPES } from '../data/recipes';
 import { buildPeriod } from './picker';
-import type { AppState, PeriodMeals } from './types';
+import type { AppState, Period } from './types';
 
-function mealsComplete(meals: Partial<PeriodMeals> | undefined): meals is PeriodMeals {
+function migrateCheckedShopping(state: AppState): AppState {
+  if (state.checkedShopping && typeof state.checkedShopping === 'object') {
+    return state;
+  }
+  return { ...state, checkedShopping: {} };
+}
+
+function migratePeopleColors(state: AppState): AppState {
+  let changed = false;
+  const people = state.people.map((p, i) => {
+    if (typeof p.colorSlot === 'number' && p.colorSlot >= 0) return p;
+    changed = true;
+    return { ...p, colorSlot: i % PERSON_COLOR_COUNT };
+  });
+  return changed ? { ...state, people } : state;
+}
+
+function mealsComplete(
+  meals: Partial<Period['meals']> | undefined,
+): meals is Period['meals'] {
   if (!meals) return false;
   return MEAL_TYPES.every((mt) => meals[mt]?.recipe?.id);
 }
 
 /** Fill missing meal slots (e.g. snack added after a saved plan). */
 export function migrateAppState(state: AppState): AppState {
-  if (!state.plan) return state;
-  if (mealsComplete(state.plan.A.meals) && mealsComplete(state.plan.B.meals)) {
-    return state;
+  const withColors = migratePeopleColors(migrateCheckedShopping(state));
+  if (!withColors.plan) return withColors;
+  if (
+    mealsComplete(withColors.plan.A.meals) &&
+    mealsComplete(withColors.plan.B.meals)
+  ) {
+    return withColors;
   }
   return {
-    ...state,
+    ...withColors,
     plan: {
       A: buildPeriod(
         PERIOD_A_META,
-        state.plan.A.meals,
-        state.people,
+        withColors.plan.A.meals,
+        withColors.people,
         RECIPES,
       ),
       B: buildPeriod(
         PERIOD_B_META,
-        state.plan.B.meals,
-        state.people,
+        withColors.plan.B.meals,
+        withColors.people,
         RECIPES,
       ),
     },

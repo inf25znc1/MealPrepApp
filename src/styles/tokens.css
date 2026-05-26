@@ -25,6 +25,12 @@
   --color-border-secondary: rgba(0, 0, 0, 0.3);
   --color-border-primary: rgba(0, 0, 0, 0.4);
   --color-border-info: #b5d4f4;
+
+  /* Household member accents (slots 5–6) */
+  --color-background-person-5: #ede9fe;
+  --color-text-person-5: #5b4596;
+  --color-background-person-6: #dff5f0;
+  --color-text-person-6: #0f6b5c;
 }
 
 [data-theme='dark'] {
@@ -48,6 +54,11 @@
   --color-border-secondary: rgba(255, 255, 255, 0.3);
   --color-border-primary: rgba(255, 255, 255, 0.4);
   --color-border-info: rgba(133, 183, 235, 0.35);
+
+  --color-background-person-5: rgba(180, 160, 230, 0.2);
+  --color-text-person-5: #b8a3e8;
+  --color-background-person-6: rgba(100, 200, 180, 0.18);
+  --color-text-person-6: #6ec9b8;
 }
 
 /* Respect OS preference if no explicit theme set */
@@ -73,5 +84,10 @@
     --color-border-secondary: rgba(255, 255, 255, 0.3);
     --color-border-primary: rgba(255, 255, 255, 0.4);
     --color-border-info: rgba(133, 183, 235, 0.35);
+
+    --color-background-person-5: rgba(180, 160, 230, 0.2);
+    --color-text-person-5: #b8a3e8;
+    --color-background-person-6: rgba(100, 200, 180, 0.18);
+    --color-text-person-6: #6ec9b8;
   }
 }

@@ -5,6 +5,7 @@ import {
   IconLockOpen,
   IconRefresh,
 } from '@tabler/icons-react';
+import { PersonLabel, PersonMacroPill } from '../PersonMacroPill';
 import { personMacros } from '../../domain/scaling';
 import {
   mealIngredientPortions,
@@ -109,32 +110,17 @@ export function MealDetailSheet({
               <p className="text-[11px] uppercase tracking-[0.5px] text-text-secondary mb-2">
                 Nutrition per meal (from raw ingredients)
               </p>
-              <div className="flex flex-col gap-2 mb-4">
+              <div className="flex flex-col items-start gap-1.5 mb-4">
                 {state.people.map((person) => {
                   const m = personMacros(person, slot.recipe);
                   const portionGrams = personMealPortionGrams(person, slot.recipe);
-                  const active = person.id === state.activePersonId;
                   return (
-                    <div
-                      key={person.id}
-                      className={`flex justify-between p-2.5 rounded-md ${
-                        active ? 'bg-bg-info' : 'bg-bg-secondary'
-                      }`}
-                    >
-                      <div>
-                        <p className="text-[13px] font-medium">{person.name}</p>
-                        <p className="text-[11px] text-text-secondary">
-                          {Math.round(m.factor * 100)}% of reference · one meal
-                          {portionGrams !== null ? ` · ${portionGrams} g` : ''}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-medium">{m.kcal} kcal</p>
-                        <p className="text-[11px] text-text-secondary">
-                          {m.p}P · {m.c}C · {m.f}F
-                        </p>
-                      </div>
-                    </div>
+                    <PersonMacroPill key={person.id} person={person}>
+                      {' · '}
+                      {m.kcal} kcal · {m.p}P {m.c}C {m.f}F ·{' '}
+                      {Math.round(m.factor * 100)}% portion
+                      {portionGrams !== null ? ` · ${portionGrams} g` : ''}
+                    </PersonMacroPill>
                   );
                 })}
               </div>
@@ -166,10 +152,16 @@ export function MealDetailSheet({
                         <th
                           key={p.id}
                           className="pb-1 px-0.5 font-normal text-right align-top leading-tight"
-                          title={`${p.name} per day`}
                         >
-                          {firstName(p.name)}
-                          <span className="block text-[10px] font-normal">/ day</span>
+                          <div className="flex flex-col items-end gap-0.5">
+                            <PersonLabel
+                              person={p}
+                              displayName={firstName(p.name)}
+                            />
+                            <span className="text-[10px] text-text-secondary">
+                              / day
+                            </span>
+                          </div>
                         </th>
                       ))}
                       <th

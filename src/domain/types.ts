@@ -22,6 +22,8 @@ export interface Person {
   cals: number; // kcal/day target
   diet: DietStyle;
   excludes: Exclusion[];
+  /** Stable index into PERSON_COLOR_SLOTS — never changes for this person. */
+  colorSlot: number;
 }
 
 export interface Ingredient {
@@ -69,6 +71,8 @@ export interface AppState {
   plan: Plan | null;
   activeTab: 'plan' | 'shop';
   activePersonId: string;
+  /** Checked shopping list items keyed by shopping item id. */
+  checkedShopping: Record<string, boolean>;
 }
 
 export interface PersonMacros {
@@ -86,10 +90,22 @@ export interface DailyTargets {
   f: number;
 }
 
+export type ShoppingCategory =
+  | 'Produce'
+  | 'Protein'
+  | 'Dairy'
+  | 'Grains & bakery'
+  | 'Legumes & nuts'
+  | 'Pantry & oils'
+  | 'Sauces & canned'
+  | 'Other';
+
 export interface ShoppingItem {
+  id: string;
   name: string;
   unit: Unit;
   qty: number;
   /** Total grams for the week when all amounts convert to weight. */
   qtyGrams: number | null;
+  category: ShoppingCategory;
 }

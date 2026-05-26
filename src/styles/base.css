@@ -9,6 +9,8 @@
   --color-bg-success: var(--color-background-success);
   --color-bg-warning: var(--color-background-warning);
   --color-bg-danger: var(--color-background-danger);
+  --color-bg-person-5: var(--color-background-person-5);
+  --color-bg-person-6: var(--color-background-person-6);
 
   --color-text-primary: var(--color-text-primary);
   --color-text-secondary: var(--color-text-secondary);
@@ -17,6 +19,8 @@
   --color-text-success: var(--color-text-success);
   --color-text-warning: var(--color-text-warning);
   --color-text-danger: var(--color-text-danger);
+  --color-text-person-5: var(--color-text-person-5);
+  --color-text-person-6: var(--color-text-person-6);
 
   --color-border-tertiary: var(--color-border-tertiary);
   --color-border-secondary: var(--color-border-secondary);

@@ -1,5 +1,7 @@
+import { nextColorSlot } from '../data/personColors';
 import { PERIOD_A_META, PERIOD_B_META } from '../data/periods';
 import { RECIPES } from '../data/recipes';
+import { migrateAppState } from '../domain/migrate';
 import { buildPeriod, rerollMeal } from '../domain/picker';
 import type {
   AppState,
@@ -18,6 +20,7 @@ export type Action =
   | { type: 'ADD_PERSON' }
   | { type: 'REMOVE_PERSON'; payload: string }
   | { type: 'UPDATE_PERSON'; payload: { id: string; patch: Partial<Person> } }
+  | { type: 'TOGGLE_SHOPPING_CHECK'; payload: { itemId: string } }
   | { type: 'HYDRATE'; payload: AppState };
 
 export const initialState: AppState = {
@@ -28,6 +31,7 @@ export const initialState: AppState = {
       cals: 2100,
       diet: 'balanced',
       excludes: [],
+      colorSlot: 0,
     },
     {
       id: 'p2',
@@ -35,11 +39,13 @@ export const initialState: AppState = {
       cals: 1800,
       diet: 'mediterranean',
       excludes: ['seafood'],
+      colorSlot: 1,
     },
   ],
   plan: null,
   activeTab: 'plan',
   activePersonId: 'p1',
+  checkedShopping: {},
 };
 
 function buildFullPlan(state: AppState): Plan {
@@ -63,7 +69,7 @@ function buildFullPlan(state: AppState): Plan {
 export function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
     case 'GENERATE_PLAN':
-      return { ...state, plan: buildFullPlan(state) };
+      return { ...state, plan: buildFullPlan(state), checkedShopping: {} };
 
     case 'REROLL_MEAL': {
       if (!state.plan) return state;
@@ -112,6 +118,7 @@ export function reducer(state: AppState, action: Action): AppState {
         cals: 2000,
         diet: 'balanced',
         excludes: [],
+        colorSlot: nextColorSlot(state.people),
       };
       return { ...state, people: [...state.people, newPerson] };
     }
@@ -133,8 +140,19 @@ export function reducer(state: AppState, action: Action): AppState {
       return { ...state, people };
     }
 
+    case 'TOGGLE_SHOPPING_CHECK': {
+      const { itemId } = action.payload;
+      const checked = { ...state.checkedShopping };
+      if (checked[itemId]) {
+        delete checked[itemId];
+      } else {
+        checked[itemId] = true;
+      }
+      return { ...state, checkedShopping: checked };
+    }
+
     case 'HYDRATE':
-      return action.payload;
+      return migrateAppState(action.payload);
 
     default:
       return state;

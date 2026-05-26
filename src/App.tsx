@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { TopBar } from './components/TopBar';
-import { PersonSwitcher } from './components/PersonSwitcher';
 import { Tabs } from './components/Tabs';
 import { PlanTab } from './components/PlanTab';
 import { GenerateWeekButton } from './components/PlanTab/GenerateWeekButton';
@@ -23,22 +22,28 @@ export default function App() {
     setMealSheet({ open: true, periodKey, mealType });
   };
 
-  return (
-    <div className="mx-auto max-w-[420px] min-h-svh flex flex-col">
-      <TopBar onOpenSettings={() => setHouseholdOpen(true)} />
-      <PersonSwitcher />
-      <Tabs />
-      <main className="min-h-0 flex-1 overflow-y-auto">
-        {/* PWA install prompt can go here in a future version */}
-        {state.activeTab === 'plan' ? (
-          <PlanTab onOpenMealDetail={openMealDetail} />
-        ) : (
-          <ShoppingTab />
-        )}
-      </main>
+  const showGenerateButton =
+    state.activeTab === 'plan' && !mealSheet.open && !householdOpen;
 
-      {state.activeTab === 'plan' && (
-        <div className="shrink-0 border-t-[0.5px] border-border-tertiary bg-bg-primary px-3.5 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+  return (
+    <div className="relative mx-auto min-h-svh max-w-[420px]">
+      <div
+        className={`flex min-h-svh flex-col${showGenerateButton ? ' pb-[calc(5.25rem+env(safe-area-inset-bottom,0px))]' : ''}`}
+      >
+        <TopBar onOpenSettings={() => setHouseholdOpen(true)} />
+        <Tabs />
+        <main className="min-h-0 flex-1">
+          {/* PWA install prompt can go here in a future version */}
+          {state.activeTab === 'plan' ? (
+            <PlanTab onOpenMealDetail={openMealDetail} />
+          ) : (
+            <ShoppingTab />
+          )}
+        </main>
+      </div>
+
+      {showGenerateButton && (
+        <div className="fixed bottom-0 left-1/2 z-20 w-full max-w-[420px] -translate-x-1/2 border-t-[0.5px] border-border-tertiary bg-bg-primary px-3.5 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           <GenerateWeekButton />
         </div>
       )}
