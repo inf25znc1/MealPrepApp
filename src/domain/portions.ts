@@ -2,7 +2,7 @@ import { personScale } from './scaling';
 import { amountToGrams, roundGrams, roundQty } from './nutrition';
 import type { Ingredient, Person, Recipe, Unit } from './types';
 
-/** Total raw weight (g) for one person's share of a single batch cook. */
+/** Raw weight (g) for one person's single meal (one container). */
 export function personMealPortionGrams(person: Person, recipe: Recipe): number | null {
   let total = 0;
   for (const ing of recipe.ingredients) {
@@ -14,90 +14,72 @@ export function personMealPortionGrams(person: Person, recipe: Recipe): number |
   return roundGrams(total);
 }
 
-/** Total raw weight (g) for the full household batch (one cook). */
-export function batchMealTotalGrams(recipe: Recipe, people: Person[]): number | null {
-  let total = 0;
-  for (const ing of recipe.ingredients) {
-    let batchAmount = 0;
-    for (const person of people) {
-      batchAmount += ing.amount * personScale(person, recipe);
-    }
-    const grams = amountToGrams(batchAmount, ing.unit, ing.name);
-    if (grams === null) return null;
-    total += grams;
-  }
-  return roundGrams(total);
+export interface PersonPortionCell {
+  personId: string;
+  amount: number;
+  grams: number | null;
 }
 
 export interface IngredientPortionLine {
   name: string;
   unit: Unit;
-  /** Active person's share from one batch cook (recipe units). */
-  perPersonAmount: number;
-  perPersonGrams: number | null;
-  /** Whole household batch for one cook (recipe units). */
-  batchTotalAmount: number;
-  batchTotalGrams: number | null;
-  /** All containers for the period (batch × days). */
+  /** Each person's portion for one day (one container). */
+  byPersonDaily: PersonPortionCell[];
+  /** Full period batch — all raw ingredients for one cook. */
   periodTotalAmount: number;
   periodTotalGrams: number | null;
 }
 
-function scaledAmount(
+function scaledShare(
   baseAmount: number,
   unit: Unit,
   name: string,
   scale: number,
-): { amount: number; grams: number | null } {
+): Omit<PersonPortionCell, 'personId'> {
   const amount = roundQty(baseAmount * scale, unit);
   const grams = amountToGrams(amount, unit, name);
-  return { amount, grams: grams !== null ? roundGrams(grams) : null };
+  return {
+    amount,
+    grams: grams !== null ? roundGrams(grams) : null,
+  };
 }
 
 /**
- * Batch model: cook one batch, divide into per-person portions.
- * Base ingredient amounts are per reference serving; each person gets
- * base × personScale; batch total is the sum of all shares.
+ * One cook per period. Person columns = daily portion; total = full period batch.
  */
 export function mealIngredientPortions(
   recipe: Recipe,
   people: Person[],
   days: number,
-  activePersonId: string,
 ): IngredientPortionLine[] {
   return recipe.ingredients.map((ing) => {
-    let batchAmount = 0;
-    let batchGrams = 0;
+    const byPersonDaily: PersonPortionCell[] = [];
+    let periodTotalAmount = 0;
+    let periodTotalGrams = 0;
     let hasAllGrams = true;
-    let perPersonAmount = 0;
-    let perPersonGrams: number | null = null;
 
     for (const person of people) {
       const scale = personScale(person, recipe);
-      const { amount, grams } = scaledAmount(ing.amount, ing.unit, ing.name, scale);
-      batchAmount += amount;
-      if (grams !== null) batchGrams += grams;
+      const daily = scaledShare(ing.amount, ing.unit, ing.name, scale);
+      byPersonDaily.push({ personId: person.id, ...daily });
+
+      const periodAmount = roundQty(daily.amount * days, ing.unit);
+      periodTotalAmount += periodAmount;
+      if (daily.grams !== null) periodTotalGrams += roundGrams(daily.grams * days);
       else hasAllGrams = false;
-      if (person.id === activePersonId) {
-        perPersonAmount = amount;
-        perPersonGrams = grams;
-      }
     }
 
     return {
       name: ing.name,
       unit: ing.unit,
-      perPersonAmount,
-      perPersonGrams,
-      batchTotalAmount: roundQty(batchAmount, ing.unit),
-      batchTotalGrams: hasAllGrams ? roundGrams(batchGrams) : null,
-      periodTotalAmount: roundQty(batchAmount * days, ing.unit),
-      periodTotalGrams: hasAllGrams ? roundGrams(batchGrams * days) : null,
+      byPersonDaily,
+      periodTotalAmount: roundQty(periodTotalAmount, ing.unit),
+      periodTotalGrams: hasAllGrams ? roundGrams(periodTotalGrams) : null,
     };
   });
 }
 
-/** Per-person lines for one ingredient (for detail sheet). */
+/** Per-person daily share for one ingredient. */
 export function personIngredientPortions(
   ing: Ingredient,
   recipe: Recipe,
@@ -110,7 +92,7 @@ export function personIngredientPortions(
 }> {
   return people.map((person) => {
     const scale = personScale(person, recipe);
-    const { amount, grams } = scaledAmount(ing.amount, ing.unit, ing.name, scale);
-    return { personId: person.id, amount, grams, unit: ing.unit };
+    const daily = scaledShare(ing.amount, ing.unit, ing.name, scale);
+    return { personId: person.id, ...daily, unit: ing.unit };
   });
 }

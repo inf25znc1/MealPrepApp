@@ -1,3 +1,4 @@
+import { MEAL_TYPES } from '../data/constants';
 import type {
   Person,
   Recipe,
@@ -13,8 +14,6 @@ export type PeriodMeta = Pick<
   Period,
   'label' | 'key' | 'days' | 'dayList' | 'cookDay' | 'eatRange'
 >;
-
-const MEAL_TYPES: MealType[] = ['breakfast', 'lunch', 'dinner'];
 
 export function allExcludes(people: Person[]): Exclusion[] {
   const set = new Set<Exclusion>();

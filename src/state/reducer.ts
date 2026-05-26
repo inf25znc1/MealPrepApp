@@ -1,3 +1,4 @@
+import { PERIOD_A_META, PERIOD_B_META } from '../data/periods';
 import { RECIPES } from '../data/recipes';
 import { buildPeriod, rerollMeal } from '../domain/picker';
 import type {
@@ -7,24 +8,6 @@ import type {
   MealType,
   Plan,
 } from '../domain/types';
-
-const PERIOD_A_META = {
-  label: 'Period A' as const,
-  key: 'A' as const,
-  days: 4,
-  dayList: ['Mon', 'Tue', 'Wed', 'Thu'],
-  cookDay: 'Sun',
-  eatRange: 'Mon–Thu',
-};
-
-const PERIOD_B_META = {
-  label: 'Period B' as const,
-  key: 'B' as const,
-  days: 3,
-  dayList: ['Fri', 'Sat', 'Sun'],
-  cookDay: 'Thu',
-  eatRange: 'Fri–Sun',
-};
 
 export type Action =
   | { type: 'GENERATE_PLAN' }

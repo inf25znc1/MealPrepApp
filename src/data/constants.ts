@@ -1,4 +1,11 @@
-import type { DietStyle, Exclusion } from '../domain/types';
+import type { DietStyle, Exclusion, MealType } from '../domain/types';
+
+export const MEAL_TYPES: MealType[] = [
+  'breakfast',
+  'lunch',
+  'dinner',
+  'snack',
+];
 
 export const DIETS: DietStyle[] = [
   'balanced',
@@ -10,12 +17,13 @@ export const DIETS: DietStyle[] = [
 
 export const EXCLUSIONS: Exclusion[] = ['pork', 'seafood', 'dairy', 'gluten'];
 
-// Daily kcal distribution across meals
-export const MEAL_BUDGETS = {
-  breakfast: 0.25,
-  lunch: 0.375,
-  dinner: 0.375,
-} as const;
+// Daily kcal distribution across meals (must sum to 1)
+export const MEAL_BUDGETS: Record<MealType, number> = {
+  breakfast: 0.22,
+  lunch: 0.33,
+  dinner: 0.33,
+  snack: 0.12,
+};
 
 // Macro split per diet style (P/C/F as fractions of total kcal)
 export const DIET_MACRO_SPLITS: Record<DietStyle, { p: number; c: number; f: number }> = {

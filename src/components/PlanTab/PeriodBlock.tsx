@@ -1,14 +1,12 @@
+import { MEAL_TYPES } from '../../data/constants';
 import { dailyActualFor } from '../../domain/intake';
-import type { Period } from '../../domain/types';
+import type { MealType, Period } from '../../domain/types';
 import { useApp } from '../../state/AppContext';
 import { MealRow } from './MealRow';
 
 interface PeriodBlockProps {
   period: Period;
-  onOpenMealDetail: (
-    periodKey: Period['key'],
-    mealType: 'breakfast' | 'lunch' | 'dinner',
-  ) => void;
+  onOpenMealDetail: (periodKey: Period['key'], mealType: MealType) => void;
 }
 
 export function PeriodBlock({ period, onOpenMealDetail }: PeriodBlockProps) {
@@ -16,12 +14,7 @@ export function PeriodBlock({ period, onOpenMealDetail }: PeriodBlockProps) {
   const person = state.people.find((p) => p.id === state.activePersonId);
   const daily = person ? dailyActualFor(person, period) : null;
 
-  const meals: Array<['breakfast' | 'lunch' | 'dinner', Period['meals']['breakfast']]> =
-    [
-      ['breakfast', period.meals.breakfast],
-      ['lunch', period.meals.lunch],
-      ['dinner', period.meals.dinner],
-    ];
+  const meals = MEAL_TYPES.map((mealType) => [mealType, period.meals[mealType]] as const);
 
   return (
     <section className="mb-[18px]">

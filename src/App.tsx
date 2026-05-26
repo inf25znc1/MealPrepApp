@@ -3,6 +3,7 @@ import { TopBar } from './components/TopBar';
 import { PersonSwitcher } from './components/PersonSwitcher';
 import { Tabs } from './components/Tabs';
 import { PlanTab } from './components/PlanTab';
+import { GenerateWeekButton } from './components/PlanTab/GenerateWeekButton';
 import { ShoppingTab } from './components/ShoppingTab';
 import { MealDetailSheet } from './components/sheets/MealDetailSheet';
 import { HouseholdSheet } from './components/sheets/HouseholdSheet';
@@ -27,7 +28,7 @@ export default function App() {
       <TopBar onOpenSettings={() => setHouseholdOpen(true)} />
       <PersonSwitcher />
       <Tabs />
-      <main className="flex-1 overflow-y-auto">
+      <main className="min-h-0 flex-1 overflow-y-auto">
         {/* PWA install prompt can go here in a future version */}
         {state.activeTab === 'plan' ? (
           <PlanTab onOpenMealDetail={openMealDetail} />
@@ -35,6 +36,12 @@ export default function App() {
           <ShoppingTab />
         )}
       </main>
+
+      {state.activeTab === 'plan' && (
+        <div className="shrink-0 border-t-[0.5px] border-border-tertiary bg-bg-primary px-3.5 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+          <GenerateWeekButton />
+        </div>
+      )}
 
       <MealDetailSheet
         open={mealSheet.open}

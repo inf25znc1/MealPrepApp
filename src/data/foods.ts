@@ -141,6 +141,22 @@ export const FOODS: Record<string, FoodProfile> = {
     fPer100g: 22,
     gramsPerUnit: { tbsp: 18 },
   },
+  apple: {
+    kcalPer100g: 52,
+    pPer100g: 0.3,
+    cPer100g: 14,
+    fPer100g: 0.2,
+    gramsPerUnit: { pcs: 180 },
+  },
+  'cottage cheese': { kcalPer100g: 98, pPer100g: 11, cPer100g: 3.4, fPer100g: 4.3 },
+  'rice cakes': {
+    kcalPer100g: 387,
+    pPer100g: 8,
+    cPer100g: 81,
+    fPer100g: 3,
+    gramsPerUnit: { pcs: 9 },
+  },
+  'dark chocolate': { kcalPer100g: 546, pPer100g: 5, cPer100g: 61, fPer100g: 31 },
 };
 
 export function foodKey(name: string): string {

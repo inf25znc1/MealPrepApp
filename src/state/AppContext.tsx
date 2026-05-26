@@ -7,6 +7,7 @@ import {
   type Dispatch,
 } from 'react';
 import { STORAGE_KEY } from '../data/constants';
+import { migrateAppState } from '../domain/migrate';
 import type { AppState } from '../domain/types';
 import { reducer, initialState, type Action } from './reducer';
 import { useDebouncedStorage } from './useLocalStorage';
@@ -27,7 +28,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (!raw) return;
       const parsed = JSON.parse(raw) as AppState;
       if (parsed && Array.isArray(parsed.people)) {
-        dispatch({ type: 'HYDRATE', payload: parsed });
+        dispatch({
+          type: 'HYDRATE',
+          payload: migrateAppState(parsed),
+        });
       }
     } catch {
       // invalid JSON — keep defaults

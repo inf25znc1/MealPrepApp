@@ -2,7 +2,7 @@ import type { Recipe } from '../domain/types';
 
 // Reference serving: ingredient amounts for one person at the listed base kcal.
 // Macros in each recipe should match src/data/foods.ts (USDA per 100 g).
-// At cook time: one batch uses the sum of each person's scaled share; divide into portions.
+// At cook time: one batch per period (all days), each person's share × period days.
 
 export const RECIPES: Recipe[] = [
   // BREAKFASTS
@@ -312,6 +312,83 @@ export const RECIPES: Recipe[] = [
       { name: 'Bell pepper', unit: 'g', amount: 100 },
       { name: 'Brown rice', unit: 'g', amount: 70 },
       { name: 'Peanut sauce', unit: 'tbsp', amount: 2 },
+    ],
+  },
+
+  // SNACKS
+  {
+    id: 'apple-almond',
+    name: 'Apple & almond butter',
+    meal: 'snack',
+    kcal: 210,
+    p: 5,
+    c: 28,
+    f: 10,
+    tags: ['balanced', 'vegetarian', 'mediterranean'],
+    excl: [],
+    ingredients: [
+      { name: 'Apple', unit: 'pcs', amount: 1 },
+      { name: 'Almond butter', unit: 'tbsp', amount: 1 },
+    ],
+  },
+  {
+    id: 'yogurt-berries-snack',
+    name: 'Greek yogurt & berries',
+    meal: 'snack',
+    kcal: 190,
+    p: 16,
+    c: 22,
+    f: 4,
+    tags: ['balanced', 'high-protein', 'mediterranean', 'vegetarian'],
+    excl: ['dairy'],
+    ingredients: [
+      { name: 'Greek yogurt', unit: 'g', amount: 120 },
+      { name: 'Mixed berries', unit: 'g', amount: 60 },
+    ],
+  },
+  {
+    id: 'hummus-veg-snack',
+    name: 'Hummus & carrot sticks',
+    meal: 'snack',
+    kcal: 200,
+    p: 8,
+    c: 24,
+    f: 9,
+    tags: ['vegetarian', 'mediterranean', 'balanced'],
+    excl: [],
+    ingredients: [
+      { name: 'Hummus', unit: 'g', amount: 80 },
+      { name: 'Carrots', unit: 'g', amount: 120 },
+    ],
+  },
+  {
+    id: 'cottage-crackers',
+    name: 'Cottage cheese & rice cakes',
+    meal: 'snack',
+    kcal: 220,
+    p: 18,
+    c: 26,
+    f: 5,
+    tags: ['balanced', 'high-protein', 'low-carb'],
+    excl: ['dairy', 'gluten'],
+    ingredients: [
+      { name: 'Cottage cheese', unit: 'g', amount: 150 },
+      { name: 'Rice cakes', unit: 'pcs', amount: 2 },
+    ],
+  },
+  {
+    id: 'walnut-chocolate',
+    name: 'Walnuts & dark chocolate',
+    meal: 'snack',
+    kcal: 240,
+    p: 6,
+    c: 18,
+    f: 18,
+    tags: ['vegetarian', 'mediterranean', 'balanced'],
+    excl: ['dairy', 'gluten'],
+    ingredients: [
+      { name: 'Walnuts', unit: 'g', amount: 25 },
+      { name: 'Dark chocolate', unit: 'g', amount: 20 },
     ],
   },
 ];

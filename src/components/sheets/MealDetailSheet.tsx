@@ -8,9 +8,10 @@ import {
 import { personMacros } from '../../domain/scaling';
 import {
   mealIngredientPortions,
-  personIngredientPortions,
+  personMealPortionGrams,
+  type PersonPortionCell,
 } from '../../domain/portions';
-import type { MealType, PeriodKey } from '../../domain/types';
+import type { MealType, PeriodKey, Unit } from '../../domain/types';
 import { useApp } from '../../state/AppContext';
 
 interface MealDetailSheetProps {
@@ -20,13 +21,38 @@ interface MealDetailSheetProps {
   mealType: MealType | null;
 }
 
-function formatAmount(amount: number, unit: string): string {
+function formatCell(cell: PersonPortionCell, unit: Unit): string {
+  if (cell.grams !== null) return `${cell.grams} g`;
+  return `${cell.amount} ${unit}`;
+}
+
+function formatTotal(grams: number | null, amount: number, unit: Unit): string {
+  if (grams !== null) return `${grams} g`;
   return `${amount} ${unit}`;
 }
 
-function formatGrams(grams: number | null): string {
-  if (grams === null) return '—';
-  return `${grams} g`;
+function firstName(name: string): string {
+  return name.trim().split(/\s+/)[0] ?? name;
+}
+
+/** Column widths (%) so the table fits 360px without horizontal scroll. */
+function tableColumnWidths(peopleCount: number): {
+  ingredient: number;
+  person: number;
+  total: number;
+} {
+  const total = 24;
+  if (peopleCount <= 1) {
+    return { ingredient: 44, person: 32, total };
+  }
+  if (peopleCount === 2) {
+    return { ingredient: 34, person: 21, total };
+  }
+  if (peopleCount === 3) {
+    return { ingredient: 28, person: 16, total };
+  }
+  const person = (100 - total - 24) / peopleCount;
+  return { ingredient: 24, person, total };
 }
 
 export function MealDetailSheet({
@@ -44,19 +70,12 @@ export function MealDetailSheet({
 
   const portionLines =
     slot && period
-      ? mealIngredientPortions(
-          slot.recipe,
-          state.people,
-          period.days,
-          state.activePersonId,
-        )
+      ? mealIngredientPortions(slot.recipe, state.people, period.days)
       : [];
 
   const daysLabel = period?.days === 1 ? 'day' : 'days';
   const peopleLabel = state.people.length === 1 ? 'person' : 'people';
-  const activePerson = state.people.find(
-    (p) => p.id === state.activePersonId,
-  );
+  const colWidths = tableColumnWidths(state.people.length);
 
   return (
     <Drawer.Root open={open} onOpenChange={onOpenChange}>
@@ -73,8 +92,8 @@ export function MealDetailSheet({
                   </p>
                   <h3 className="text-lg font-medium">{slot.recipe.name}</h3>
                   <p className="text-xs text-text-secondary mt-1">
-                    Cooked in one batch, divided into {state.people.length}{' '}
-                    {peopleLabel}
+                    One batch for {period.days} {daysLabel}, divided into{' '}
+                    {state.people.length} {peopleLabel}
                   </p>
                 </div>
                 <button
@@ -88,23 +107,12 @@ export function MealDetailSheet({
               </div>
 
               <p className="text-[11px] uppercase tracking-[0.5px] text-text-secondary mb-2">
-                Nutrition per person (from raw ingredients)
+                Nutrition per meal (from raw ingredients)
               </p>
               <div className="flex flex-col gap-2 mb-4">
                 {state.people.map((person) => {
                   const m = personMacros(person, slot.recipe);
-                  let portionGrams = 0;
-                  let allGrams = true;
-                  for (const ing of slot.recipe.ingredients) {
-                    const shares = personIngredientPortions(
-                      ing,
-                      slot.recipe,
-                      [person],
-                    );
-                    const g = shares[0]?.grams;
-                    if (g !== null) portionGrams += g;
-                    else allGrams = false;
-                  }
+                  const portionGrams = personMealPortionGrams(person, slot.recipe);
                   const active = person.id === state.activePersonId;
                   return (
                     <div
@@ -116,8 +124,8 @@ export function MealDetailSheet({
                       <div>
                         <p className="text-[13px] font-medium">{person.name}</p>
                         <p className="text-[11px] text-text-secondary">
-                          {Math.round(m.factor * 100)}% of reference batch
-                          {allGrams ? ` · ${portionGrams} g total` : ''}
+                          {Math.round(m.factor * 100)}% of reference · one meal
+                          {portionGrams !== null ? ` · ${portionGrams} g` : ''}
                         </p>
                       </div>
                       <div className="text-right">
@@ -132,64 +140,83 @@ export function MealDetailSheet({
               </div>
 
               <p className="text-[11px] uppercase tracking-[0.5px] text-text-secondary mb-2">
-                One batch cook · portions for {activePerson?.name ?? 'you'}
+                {period.label} batch · cook once for {period.days} {daysLabel}
               </p>
-              <table className="w-full text-sm mb-4">
-                <thead>
-                  <tr className="text-[11px] text-text-secondary text-left">
-                    <th className="pb-1 font-normal">Ingredient</th>
-                    <th className="pb-1 font-normal text-right">Per person</th>
-                    <th className="pb-1 font-normal text-right">Batch total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {portionLines.map((row) => (
-                    <tr
-                      key={row.name}
-                      className="border-b-[0.5px] border-border-tertiary"
-                    >
-                      <td className="py-2 pr-2">{row.name}</td>
-                      <td className="py-2 text-right text-text-secondary tabular-nums">
-                        {row.perPersonGrams !== null ? (
-                          formatGrams(row.perPersonGrams)
-                        ) : (
-                          formatAmount(row.perPersonAmount, row.unit)
-                        )}
-                      </td>
-                      <td className="py-2 text-right text-text-secondary tabular-nums">
-                        {row.batchTotalGrams !== null ? (
-                          formatGrams(row.batchTotalGrams)
-                        ) : (
-                          formatAmount(row.batchTotalAmount, row.unit)
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-
-              <p className="text-[11px] uppercase tracking-[0.5px] text-text-secondary mb-2">
-                Period prep · {period.days} {daysLabel}
+              <p className="text-xs text-text-secondary mb-2">
+                Person columns are per day; total is for the full period.
               </p>
-              <table className="w-full text-sm mb-4">
-                <tbody>
-                  {portionLines.map((row) => (
-                    <tr
-                      key={`period-${row.name}`}
-                      className="border-b-[0.5px] border-border-tertiary"
-                    >
-                      <td className="py-2">{row.name}</td>
-                      <td className="py-2 text-right text-text-secondary tabular-nums">
-                        {row.periodTotalGrams !== null ? (
-                          formatGrams(row.periodTotalGrams)
-                        ) : (
-                          formatAmount(row.periodTotalAmount, row.unit)
-                        )}
-                      </td>
+              <div className="mb-4 w-full">
+                <table className="w-full table-fixed text-sm">
+                  <colgroup>
+                    <col style={{ width: `${colWidths.ingredient}%` }} />
+                    {state.people.map((p) => (
+                      <col
+                        key={p.id}
+                        style={{ width: `${colWidths.person}%` }}
+                      />
+                    ))}
+                    <col style={{ width: `${colWidths.total}%` }} />
+                  </colgroup>
+                  <thead>
+                    <tr className="text-[11px] text-text-secondary">
+                      <th className="pb-1 pr-1 font-normal text-left align-top leading-tight">
+                        Ingredient
+                      </th>
+                      {state.people.map((p) => (
+                        <th
+                          key={p.id}
+                          className="pb-1 px-0.5 font-normal text-right align-top leading-tight"
+                          title={`${p.name} per day`}
+                        >
+                          {firstName(p.name)}
+                          <span className="block text-[10px] font-normal">/ day</span>
+                        </th>
+                      ))}
+                      <th
+                        className="pb-1 pl-0.5 font-normal text-right align-top leading-tight"
+                        title={`Full period (${period.days} ${daysLabel})`}
+                      >
+                        Total
+                        <span className="block text-[10px] font-normal">
+                          {period.days} {daysLabel}
+                        </span>
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {portionLines.map((row) => (
+                      <tr
+                        key={row.name}
+                        className="border-b-[0.5px] border-border-tertiary"
+                      >
+                        <td className="py-2 pr-1 align-top break-words leading-snug">
+                          {row.name}
+                        </td>
+                        {state.people.map((p) => {
+                          const cell = row.byPersonDaily.find(
+                            (c) => c.personId === p.id,
+                          );
+                          return (
+                            <td
+                              key={p.id}
+                              className="py-2 px-0.5 text-right align-top text-text-secondary tabular-nums leading-snug"
+                            >
+                              {cell ? formatCell(cell, row.unit) : '—'}
+                            </td>
+                          );
+                        })}
+                        <td className="py-2 pl-0.5 text-right align-top text-text-secondary tabular-nums leading-snug">
+                          {formatTotal(
+                            row.periodTotalGrams,
+                            row.periodTotalAmount,
+                            row.unit,
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
 
               <div className="flex gap-2">
                 <button

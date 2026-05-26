@@ -10,7 +10,7 @@ export type DietStyle =
 
 export type Exclusion = 'pork' | 'seafood' | 'dairy' | 'gluten';
 
-export type MealType = 'breakfast' | 'lunch' | 'dinner';
+export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 
 export type PeriodKey = 'A' | 'B';
 
@@ -56,11 +56,7 @@ export interface Period {
   dayList: string[];
   cookDay: string;
   eatRange: string;
-  meals: {
-    breakfast: MealSlot;
-    lunch: MealSlot;
-    dinner: MealSlot;
-  };
+  meals: Record<MealType, MealSlot>;
 }
 
 export interface Plan {

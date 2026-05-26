@@ -2,6 +2,7 @@ import {
   IconCoffee,
   IconBowl,
   IconToolsKitchen2,
+  IconApple,
   IconLock,
   IconLockOpen,
   IconRefresh,
@@ -22,6 +23,7 @@ const MEAL_ICONS = {
   breakfast: IconCoffee,
   lunch: IconBowl,
   dinner: IconToolsKitchen2,
+  snack: IconApple,
 } as const;
 
 export function MealRow({
