@@ -41,3 +41,7 @@ npm run dev
 4. Deploy
 
 Pushing to `main` triggers production deploys; other branches get preview URLs.
+
+### iOS install
+
+On iPhone, open the deployed URL in Safari (not Chrome), tap Share → Add to Home Screen. The icon should appear automatically. If you see a screenshot instead of the icon, clear Safari's cache (Settings → Safari → Clear History and Website Data) and try again — Safari aggressively caches apple-touch-icons.

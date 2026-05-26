@@ -10,7 +10,7 @@ export default defineConfig({
     VitePWA({
       devOptions: { enabled: false },
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico'],
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
       manifest: {
         name: 'Meal Prep',
         short_name: 'Meal Prep',
