@@ -1,0 +1,32 @@
+@import 'tailwindcss';
+@import './tokens.css';
+
+@theme {
+  --color-bg-primary: var(--color-background-primary);
+  --color-bg-secondary: var(--color-background-secondary);
+  --color-bg-tertiary: var(--color-background-tertiary);
+  --color-bg-info: var(--color-background-info);
+  --color-bg-success: var(--color-background-success);
+  --color-bg-warning: var(--color-background-warning);
+  --color-bg-danger: var(--color-background-danger);
+
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-tertiary: var(--color-text-tertiary);
+  --color-text-info: var(--color-text-info);
+  --color-text-success: var(--color-text-success);
+  --color-text-warning: var(--color-text-warning);
+  --color-text-danger: var(--color-text-danger);
+
+  --color-border-tertiary: var(--color-border-tertiary);
+  --color-border-secondary: var(--color-border-secondary);
+  --color-border-primary: var(--color-border-primary);
+  --color-border-info: var(--color-border-info);
+
+  --radius-md: 8px;
+  --radius-lg: 12px;
+}
+
+body {
+  @apply min-h-svh font-sans antialiased text-text-primary bg-bg-primary;
+}

@@ -1,0 +1,77 @@
+/* Design tokens. Reference these via Tailwind classes set up in tailwind.config.js.
+   Never hardcode hex values in components. */
+
+:root {
+  /* Backgrounds */
+  --color-background-primary: #ffffff;
+  --color-background-secondary: #f5f4ef;
+  --color-background-tertiary: #ebe9e0;
+  --color-background-info: #e6f1fb;
+  --color-background-success: #eaf3de;
+  --color-background-warning: #faeeda;
+  --color-background-danger: #fcebeb;
+
+  /* Text */
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #6b6a64;
+  --color-text-tertiary: #93918a;
+  --color-text-info: #185fa5;
+  --color-text-success: #3b6d11;
+  --color-text-warning: #854f0b;
+  --color-text-danger: #a32d2d;
+
+  /* Borders */
+  --color-border-tertiary: rgba(0, 0, 0, 0.15);
+  --color-border-secondary: rgba(0, 0, 0, 0.3);
+  --color-border-primary: rgba(0, 0, 0, 0.4);
+  --color-border-info: #b5d4f4;
+}
+
+[data-theme='dark'] {
+  --color-background-primary: #1f1e1c;
+  --color-background-secondary: #2a2925;
+  --color-background-tertiary: #34332f;
+  --color-background-info: rgba(133, 183, 235, 0.15);
+  --color-background-success: rgba(150, 200, 100, 0.15);
+  --color-background-warning: rgba(220, 165, 80, 0.15);
+  --color-background-danger: rgba(220, 100, 100, 0.15);
+
+  --color-text-primary: #f5f4ef;
+  --color-text-secondary: #a8a69e;
+  --color-text-tertiary: #777570;
+  --color-text-info: #85b7eb;
+  --color-text-success: #a3c97d;
+  --color-text-warning: #e5b06f;
+  --color-text-danger: #e88a8a;
+
+  --color-border-tertiary: rgba(255, 255, 255, 0.15);
+  --color-border-secondary: rgba(255, 255, 255, 0.3);
+  --color-border-primary: rgba(255, 255, 255, 0.4);
+  --color-border-info: rgba(133, 183, 235, 0.35);
+}
+
+/* Respect OS preference if no explicit theme set */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --color-background-primary: #1f1e1c;
+    --color-background-secondary: #2a2925;
+    --color-background-tertiary: #34332f;
+    --color-background-info: rgba(133, 183, 235, 0.15);
+    --color-background-success: rgba(150, 200, 100, 0.15);
+    --color-background-warning: rgba(220, 165, 80, 0.15);
+    --color-background-danger: rgba(220, 100, 100, 0.15);
+
+    --color-text-primary: #f5f4ef;
+    --color-text-secondary: #a8a69e;
+    --color-text-tertiary: #777570;
+    --color-text-info: #85b7eb;
+    --color-text-success: #a3c97d;
+    --color-text-warning: #e5b06f;
+    --color-text-danger: #e88a8a;
+
+    --color-border-tertiary: rgba(255, 255, 255, 0.15);
+    --color-border-secondary: rgba(255, 255, 255, 0.3);
+    --color-border-primary: rgba(255, 255, 255, 0.4);
+    --color-border-info: rgba(133, 183, 235, 0.35);
+  }
+}
