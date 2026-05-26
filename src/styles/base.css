@@ -32,5 +32,5 @@
 }
 
 body {
-  @apply min-h-svh font-sans antialiased text-text-primary bg-bg-primary;
+  @apply min-h-svh font-sans antialiased text-text-primary bg-bg-secondary;
 }

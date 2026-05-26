@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { ui } from '../i18n';
 import type { DailyTargets, PersonMacros } from '../domain/types';
 
 function MacroValue({ children }: { children: ReactNode }) {
@@ -22,7 +23,7 @@ interface PersonMacroValuesProps {
 
 export function PersonMacroValues({
   macros,
-  kcalLabel = ' kcal',
+  kcalLabel = ui.kcal,
   className = '',
 }: PersonMacroValuesProps) {
   return (
@@ -31,13 +32,13 @@ export function PersonMacroValues({
       <MacroType>{kcalLabel}</MacroType>
       <MacroType> · </MacroType>
       <MacroValue>{macros.p}</MacroValue>
-      <MacroType> P</MacroType>
+      <MacroType>{ui.macroProtein}</MacroType>
       <MacroType> · </MacroType>
       <MacroValue>{macros.c}</MacroValue>
-      <MacroType> C</MacroType>
+      <MacroType>{ui.macroCarbs}</MacroType>
       <MacroType> · </MacroType>
       <MacroValue>{macros.f}</MacroValue>
-      <MacroType> F</MacroType>
+      <MacroType>{ui.macroFat}</MacroType>
     </span>
   );
 }

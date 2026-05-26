@@ -1,4 +1,5 @@
 import { IconSparkles } from '@tabler/icons-react';
+import { ui } from '../../i18n';
 import { useApp } from '../../state/AppContext';
 
 export function GenerateWeekButton() {
@@ -11,7 +12,7 @@ export function GenerateWeekButton() {
       className="flex w-full items-center justify-center gap-2 rounded-lg bg-text-info py-3.5 font-medium text-white"
     >
       <IconSparkles size={18} aria-hidden />
-      Generate week
+      {ui.generateWeek}
     </button>
   );
 }

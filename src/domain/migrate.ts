@@ -29,9 +29,26 @@ function mealsComplete(
   return MEAL_TYPES.every((mt) => meals[mt]?.recipe?.id);
 }
 
+function migratePeriodLabels(state: AppState): AppState {
+  if (!state.plan) return state;
+  const { A, B } = state.plan;
+  if (A.label === PERIOD_A_META.label && B.label === PERIOD_B_META.label) {
+    return state;
+  }
+  return {
+    ...state,
+    plan: {
+      A: { ...A, label: PERIOD_A_META.label },
+      B: { ...B, label: PERIOD_B_META.label },
+    },
+  };
+}
+
 /** Fill missing meal slots (e.g. snack added after a saved plan). */
 export function migrateAppState(state: AppState): AppState {
-  const withColors = migratePeopleColors(migrateCheckedShopping(state));
+  const withColors = migratePeriodLabels(
+    migratePeopleColors(migrateCheckedShopping(state)),
+  );
   if (!withColors.plan) return withColors;
   if (
     mealsComplete(withColors.plan.A.meals) &&

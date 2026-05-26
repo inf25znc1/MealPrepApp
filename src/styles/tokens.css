@@ -21,7 +21,7 @@
   --color-text-danger: #a32d2d;
 
   /* Borders */
-  --color-border-tertiary: rgba(0, 0, 0, 0.15);
+  --color-border-tertiary: rgba(0, 0, 0, 0.08);
   --color-border-secondary: rgba(0, 0, 0, 0.3);
   --color-border-primary: rgba(0, 0, 0, 0.4);
   --color-border-info: #b5d4f4;
@@ -50,7 +50,7 @@
   --color-text-warning: #e5b06f;
   --color-text-danger: #e88a8a;
 
-  --color-border-tertiary: rgba(255, 255, 255, 0.15);
+  --color-border-tertiary: rgba(255, 255, 255, 0.08);
   --color-border-secondary: rgba(255, 255, 255, 0.3);
   --color-border-primary: rgba(255, 255, 255, 0.4);
   --color-border-info: rgba(133, 183, 235, 0.35);
@@ -80,7 +80,7 @@
     --color-text-warning: #e5b06f;
     --color-text-danger: #e88a8a;
 
-    --color-border-tertiary: rgba(255, 255, 255, 0.15);
+    --color-border-tertiary: rgba(255, 255, 255, 0.08);
     --color-border-secondary: rgba(255, 255, 255, 0.3);
     --color-border-primary: rgba(255, 255, 255, 0.4);
     --color-border-info: rgba(133, 183, 235, 0.35);

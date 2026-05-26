@@ -1,4 +1,5 @@
 import { IconLock, IconLockOpen, IconRefresh } from '@tabler/icons-react';
+import { mealTypeLabel, recipeName, ui } from '../../i18n';
 import { PersonLabel } from '../PersonMacroPill';
 import { PersonMacroValues } from '../PersonMacroValues';
 import { personMacros } from '../../domain/scaling';
@@ -31,19 +32,21 @@ export function MealRow({
           onOpenDetail(periodKey, mealType);
         }
       }}
-      className="cursor-pointer rounded-md border-[0.5px] border-border-tertiary p-3"
+      className="cursor-pointer rounded-md border-[0.5px] border-border-tertiary bg-bg-primary p-3"
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
           <p className="text-[11px] font-normal uppercase tracking-[0.5px] text-text-tertiary">
-            {mealType}
+            {mealTypeLabel(mealType)}
           </p>
-          <p className="truncate text-sm font-medium">{slot.recipe.name}</p>
+          <p className="truncate text-sm font-medium">
+            {recipeName(slot.recipe.id, slot.recipe.name)}
+          </p>
         </div>
         <div className="flex shrink-0 items-center gap-0.5">
           <button
             type="button"
-            aria-label={slot.locked ? 'Unlock meal' : 'Lock meal'}
+            aria-label={slot.locked ? ui.unlockMeal : ui.lockMeal}
             className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-md ${
               slot.locked ? 'bg-bg-info text-text-info' : 'bg-transparent'
             }`}
@@ -63,7 +66,7 @@ export function MealRow({
           </button>
           <button
             type="button"
-            aria-label="Re-roll meal"
+            aria-label={ui.rerollMeal}
             disabled={slot.locked}
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-transparent disabled:opacity-30"
             onClick={(e) => {

@@ -44,6 +44,7 @@ export interface Recipe {
   tags: DietStyle[]; // diet styles this recipe fits
   excl: Exclusion[]; // exclusions this recipe triggers
   ingredients: Ingredient[];
+  steps: string[];
 }
 
 export interface MealSlot {
@@ -52,7 +53,7 @@ export interface MealSlot {
 }
 
 export interface Period {
-  label: 'Period A' | 'Period B';
+  label: string;
   key: PeriodKey;
   days: number;
   dayList: string[];

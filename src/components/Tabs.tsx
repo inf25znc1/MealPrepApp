@@ -1,14 +1,15 @@
+import { ui } from '../i18n';
 import { useApp } from '../state/AppContext';
 
 export function Tabs() {
   const { state, dispatch } = useApp();
   const tabs = [
-    { id: 'plan' as const, label: 'Plan' },
-    { id: 'shop' as const, label: 'Shopping' },
+    { id: 'plan' as const, label: ui.tabPlan },
+    { id: 'shop' as const, label: ui.tabShopping },
   ];
 
   return (
-    <div className="flex border-b-[0.5px] border-border-tertiary">
+    <div className="flex border-b-[0.5px] border-border-tertiary bg-bg-primary">
       {tabs.map((tab) => {
         const active = state.activeTab === tab.id;
         return (

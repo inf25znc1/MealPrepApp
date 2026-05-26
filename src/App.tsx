@@ -26,13 +26,13 @@ export default function App() {
     state.activeTab === 'plan' && !mealSheet.open && !householdOpen;
 
   return (
-    <div className="relative mx-auto min-h-svh max-w-[420px]">
+    <div className="relative mx-auto min-h-svh max-w-[420px] bg-bg-secondary">
       <div
-        className={`flex min-h-svh flex-col${showGenerateButton ? ' pb-[calc(5.25rem+env(safe-area-inset-bottom,0px))]' : ''}`}
+        className={`flex min-h-svh flex-col bg-bg-secondary${showGenerateButton ? ' pb-[calc(5.25rem+env(safe-area-inset-bottom,0px))]' : ''}`}
       >
         <TopBar onOpenSettings={() => setHouseholdOpen(true)} />
         <Tabs />
-        <main className="min-h-0 flex-1">
+        <main className="min-h-0 flex-1 bg-bg-secondary">
           {/* PWA install prompt can go here in a future version */}
           {state.activeTab === 'plan' ? (
             <PlanTab onOpenMealDetail={openMealDetail} />

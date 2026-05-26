@@ -1,15 +1,20 @@
 import { Drawer } from 'vaul';
+import { IconX } from '@tabler/icons-react';
+import { PersonLabel } from '../PersonMacroPill';
+import { PersonMacroValues } from '../PersonMacroValues';
+import { stepsFor } from '../../data/recipeSteps';
 import {
-  IconX,
-  IconLock,
-  IconLockOpen,
-  IconRefresh,
-} from '@tabler/icons-react';
-import { PersonLabel, PersonMacroPill } from '../PersonMacroPill';
+  daysWord,
+  ingredientLabel,
+  mealTypeLabel,
+  periodLabel,
+  recipeName,
+  ui,
+  unitLabel,
+} from '../../i18n';
 import { personMacros } from '../../domain/scaling';
 import {
   mealIngredientPortions,
-  personMealPortionGrams,
   type PersonPortionCell,
 } from '../../domain/portions';
 import type { MealType, PeriodKey, Unit } from '../../domain/types';
@@ -23,13 +28,13 @@ interface MealDetailSheetProps {
 }
 
 function formatCell(cell: PersonPortionCell, unit: Unit): string {
-  if (cell.grams !== null) return `${cell.grams} g`;
-  return `${cell.amount} ${unit}`;
+  if (cell.grams !== null) return `${cell.grams} ${unitLabel('g')}`;
+  return `${cell.amount} ${unitLabel(unit)}`;
 }
 
 function formatTotal(grams: number | null, amount: number, unit: Unit): string {
-  if (grams !== null) return `${grams} g`;
-  return `${amount} ${unit}`;
+  if (grams !== null) return `${grams} ${unitLabel('g')}`;
+  return `${amount} ${unitLabel(unit)}`;
 }
 
 function firstName(name: string): string {
@@ -62,7 +67,7 @@ export function MealDetailSheet({
   periodKey,
   mealType,
 }: MealDetailSheetProps) {
-  const { state, dispatch } = useApp();
+  const { state } = useApp();
 
   const period =
     periodKey && state.plan ? state.plan[periodKey] : null;
@@ -74,9 +79,14 @@ export function MealDetailSheet({
       ? mealIngredientPortions(slot.recipe, state.people, period.days)
       : [];
 
-  const daysLabel = period?.days === 1 ? 'day' : 'days';
-  const peopleLabel = state.people.length === 1 ? 'person' : 'people';
+  const daysLabel = period ? daysWord(period.days) : '';
   const colWidths = tableColumnWidths(state.people.length);
+  const recipeSteps =
+    slot && slot.recipe.steps?.length
+      ? slot.recipe.steps
+      : slot
+        ? stepsFor(slot.recipe.id)
+        : [];
 
   return (
     <Drawer.Root open={open} onOpenChange={onOpenChange}>
@@ -89,17 +99,15 @@ export function MealDetailSheet({
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <p className="text-[11px] uppercase tracking-[0.5px] text-text-secondary">
-                    {period.label} · {mealType}
+                    {periodLabel(period.key)} · {mealTypeLabel(mealType)}
                   </p>
-                  <h3 className="text-lg font-medium">{slot.recipe.name}</h3>
-                  <p className="text-xs text-text-secondary mt-1">
-                    One batch for {period.days} {daysLabel}, divided into{' '}
-                    {state.people.length} {peopleLabel}
-                  </p>
+                  <h3 className="text-lg font-medium">
+                    {recipeName(slot.recipe.id, slot.recipe.name)}
+                  </h3>
                 </div>
                 <button
                   type="button"
-                  aria-label="Close"
+                  aria-label={ui.close}
                   className="flex items-center justify-center w-11 h-11"
                   onClick={() => onOpenChange(false)}
                 >
@@ -107,30 +115,26 @@ export function MealDetailSheet({
                 </button>
               </div>
 
-              <p className="text-[11px] uppercase tracking-[0.5px] text-text-secondary mb-2">
-                Nutrition per meal (from raw ingredients)
-              </p>
-              <div className="flex flex-col items-start gap-1.5 mb-4">
-                {state.people.map((person) => {
-                  const m = personMacros(person, slot.recipe);
-                  const portionGrams = personMealPortionGrams(person, slot.recipe);
-                  return (
-                    <PersonMacroPill key={person.id} person={person}>
-                      {' · '}
-                      {m.kcal} kcal · {m.p}P {m.c}C {m.f}F ·{' '}
-                      {Math.round(m.factor * 100)}% portion
-                      {portionGrams !== null ? ` · ${portionGrams} g` : ''}
-                    </PersonMacroPill>
-                  );
-                })}
+              <div className="mb-4 rounded-lg bg-bg-secondary p-4">
+                <p className="mb-2 text-[11px] uppercase tracking-[0.5px] text-text-secondary">
+                  {ui.nutritionPerMeal}
+                </p>
+                <div className="flex flex-col gap-1">
+                  {state.people.map((person) => {
+                    const m = personMacros(person, slot.recipe);
+                    return (
+                      <div
+                        key={person.id}
+                        className="flex items-baseline justify-between gap-2"
+                      >
+                        <PersonLabel person={person} className="shrink-0" />
+                        <PersonMacroValues macros={m} />
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
-              <p className="text-[11px] uppercase tracking-[0.5px] text-text-secondary mb-2">
-                {period.label} batch · cook once for {period.days} {daysLabel}
-              </p>
-              <p className="text-xs text-text-secondary mb-2">
-                Person columns are per day; total is for the full period.
-              </p>
               <div className="mb-4 w-full">
                 <table className="w-full table-fixed text-sm">
                   <colgroup>
@@ -146,7 +150,7 @@ export function MealDetailSheet({
                   <thead>
                     <tr className="text-[11px] text-text-secondary">
                       <th className="pb-1 pr-1 font-normal text-left align-top leading-tight">
-                        Ingredient
+                        {ui.ingredient}
                       </th>
                       {state.people.map((p) => (
                         <th
@@ -159,16 +163,16 @@ export function MealDetailSheet({
                               displayName={firstName(p.name)}
                             />
                             <span className="text-[10px] text-text-secondary">
-                              / day
+                              {ui.perDay}
                             </span>
                           </div>
                         </th>
                       ))}
                       <th
                         className="pb-1 pl-0.5 font-normal text-right align-top leading-tight"
-                        title={`Full period (${period.days} ${daysLabel})`}
+                        title={ui.fullPeriod(period.days, daysLabel)}
                       >
-                        Total
+                        {ui.total}
                         <span className="block text-[10px] font-normal">
                           {period.days} {daysLabel}
                         </span>
@@ -182,7 +186,7 @@ export function MealDetailSheet({
                         className="border-b-[0.5px] border-border-tertiary"
                       >
                         <td className="py-2 pr-1 align-top break-words leading-snug">
-                          {row.name}
+                          {ingredientLabel(row.name)}
                         </td>
                         {state.people.map((p) => {
                           const cell = row.byPersonDaily.find(
@@ -210,47 +214,28 @@ export function MealDetailSheet({
                 </table>
               </div>
 
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-md border-[0.5px] ${
-                    slot.locked
-                      ? 'bg-bg-info text-text-info border-border-info'
-                      : 'border-border-tertiary'
-                  }`}
-                  onClick={() => {
-                    if (periodKey && mealType) {
-                      dispatch({
-                        type: 'TOGGLE_LOCK',
-                        payload: { periodKey, mealType },
-                      });
-                    }
-                  }}
-                >
-                  {slot.locked ? (
-                    <IconLock size={18} aria-hidden />
-                  ) : (
-                    <IconLockOpen size={18} aria-hidden />
-                  )}
-                  {slot.locked ? 'Locked' : 'Lock meal'}
-                </button>
-                <button
-                  type="button"
-                  disabled={slot.locked}
-                  className="flex-1 flex items-center justify-center gap-2 py-3 rounded-md bg-text-info text-white disabled:opacity-30"
-                  onClick={() => {
-                    if (periodKey && mealType) {
-                      dispatch({
-                        type: 'REROLL_MEAL',
-                        payload: { periodKey, mealType },
-                      });
-                    }
-                  }}
-                >
-                  <IconRefresh size={18} aria-hidden />
-                  Re-roll
-                </button>
-              </div>
+              {recipeSteps.length > 0 && (
+                <div className="mb-4 rounded-lg bg-bg-secondary p-4">
+                  <p className="mb-3 text-[11px] uppercase tracking-[0.5px] text-text-secondary">
+                    {ui.steps}
+                  </p>
+                  <ol className="flex list-none flex-col gap-3">
+                    {recipeSteps.map((step, index) => (
+                      <li key={index} className="flex gap-3">
+                        <span
+                          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-bg-tertiary text-xs font-medium text-text-secondary"
+                          aria-hidden
+                        >
+                          {index + 1}
+                        </span>
+                        <span className="pt-0.5 text-sm leading-snug text-text-primary">
+                          {step}
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
             </div>
           )}
         </Drawer.Content>

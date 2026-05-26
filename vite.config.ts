@@ -12,9 +12,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
       manifest: {
-        name: 'Meal Prep',
-        short_name: 'Meal Prep',
-        description: 'Plan a week of meals across two cook sessions',
+        name: 'Готування на тиждень',
+        short_name: 'Готування',
+        description: 'Плануйте тиждень страв у двох сесіях приготування',
         theme_color: '#1a1a1a',
         background_color: '#ffffff',
         display: 'standalone',

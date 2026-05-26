@@ -1,4 +1,5 @@
 import type { Recipe } from '../domain/types';
+import { stepsFor } from './recipeSteps';
 
 // Reference serving: ingredient amounts for one person at the listed base kcal.
 // Macros in each recipe should match src/data/foods.ts (USDA per 100 g).
@@ -23,6 +24,7 @@ export const RECIPES: Recipe[] = [
       { name: 'Almond butter', unit: 'tbsp', amount: 1 },
       { name: 'Honey', unit: 'tsp', amount: 1 },
     ],
+    steps: stepsFor('oat-bowl'),
   },
   {
     id: 'eggs-avo',
@@ -41,6 +43,7 @@ export const RECIPES: Recipe[] = [
       { name: 'Cherry tomatoes', unit: 'g', amount: 80 },
       { name: 'Olive oil', unit: 'tsp', amount: 1 },
     ],
+    steps: stepsFor('eggs-avo'),
   },
   {
     id: 'tofu-scramble',
@@ -59,6 +62,7 @@ export const RECIPES: Recipe[] = [
       { name: 'Onion', unit: 'g', amount: 40 },
       { name: 'Olive oil', unit: 'tsp', amount: 1 },
     ],
+    steps: stepsFor('tofu-scramble'),
   },
   {
     id: 'chia-pudding',
@@ -76,6 +80,7 @@ export const RECIPES: Recipe[] = [
       { name: 'Banana', unit: 'pcs', amount: 1 },
       { name: 'Walnuts', unit: 'g', amount: 15 },
     ],
+    steps: stepsFor('chia-pudding'),
   },
   {
     id: 'pancakes',
@@ -93,6 +98,7 @@ export const RECIPES: Recipe[] = [
       { name: 'Eggs', unit: 'pcs', amount: 2 },
       { name: 'Greek yogurt', unit: 'g', amount: 80 },
     ],
+    steps: stepsFor('pancakes'),
   },
 
   // LUNCHES
@@ -113,6 +119,7 @@ export const RECIPES: Recipe[] = [
       { name: 'Lemon', unit: 'pcs', amount: 0.5 },
       { name: 'Olive oil', unit: 'tbsp', amount: 1 },
     ],
+    steps: stepsFor('chicken-rice'),
   },
   {
     id: 'salmon-quinoa',
@@ -131,6 +138,7 @@ export const RECIPES: Recipe[] = [
       { name: 'Cherry tomatoes', unit: 'g', amount: 100 },
       { name: 'Olive oil', unit: 'tbsp', amount: 1 },
     ],
+    steps: stepsFor('salmon-quinoa'),
   },
   {
     id: 'turkey-wrap',
@@ -149,6 +157,7 @@ export const RECIPES: Recipe[] = [
       { name: 'Spinach', unit: 'g', amount: 40 },
       { name: 'Bell pepper', unit: 'g', amount: 60 },
     ],
+    steps: stepsFor('turkey-wrap'),
   },
   {
     id: 'chickpea-salad',
@@ -167,6 +176,7 @@ export const RECIPES: Recipe[] = [
       { name: 'Feta', unit: 'g', amount: 50 },
       { name: 'Olive oil', unit: 'tbsp', amount: 1 },
     ],
+    steps: stepsFor('chickpea-salad'),
   },
   {
     id: 'beef-stirfry',
@@ -185,6 +195,7 @@ export const RECIPES: Recipe[] = [
       { name: 'Brown rice', unit: 'g', amount: 60 },
       { name: 'Soy sauce', unit: 'tbsp', amount: 1 },
     ],
+    steps: stepsFor('beef-stirfry'),
   },
   {
     id: 'lentil-soup',
@@ -203,6 +214,7 @@ export const RECIPES: Recipe[] = [
       { name: 'Celery', unit: 'g', amount: 60 },
       { name: 'Vegetable stock', unit: 'ml', amount: 400 },
     ],
+    steps: stepsFor('lentil-soup'),
   },
 
   // DINNERS
@@ -223,6 +235,7 @@ export const RECIPES: Recipe[] = [
       { name: 'Brussels sprouts', unit: 'g', amount: 120 },
       { name: 'Olive oil', unit: 'tbsp', amount: 1 },
     ],
+    steps: stepsFor('pork-veg'),
   },
   {
     id: 'cod-veg',
@@ -241,6 +254,7 @@ export const RECIPES: Recipe[] = [
       { name: 'Potato', unit: 'g', amount: 150 },
       { name: 'Olive oil', unit: 'tbsp', amount: 1 },
     ],
+    steps: stepsFor('cod-veg'),
   },
   {
     id: 'chicken-pasta',
@@ -259,6 +273,7 @@ export const RECIPES: Recipe[] = [
       { name: 'Cherry tomatoes', unit: 'g', amount: 100 },
       { name: 'Parmesan', unit: 'g', amount: 20 },
     ],
+    steps: stepsFor('chicken-pasta'),
   },
   {
     id: 'veggie-curry',
@@ -277,6 +292,7 @@ export const RECIPES: Recipe[] = [
       { name: 'Basmati rice', unit: 'g', amount: 80 },
       { name: 'Curry paste', unit: 'tbsp', amount: 2 },
     ],
+    steps: stepsFor('veggie-curry'),
   },
   {
     id: 'meatballs',
@@ -295,6 +311,7 @@ export const RECIPES: Recipe[] = [
       { name: 'Onion', unit: 'g', amount: 40 },
       { name: 'Olive oil', unit: 'tbsp', amount: 1 },
     ],
+    steps: stepsFor('meatballs'),
   },
   {
     id: 'tofu-stirfry',
@@ -313,6 +330,7 @@ export const RECIPES: Recipe[] = [
       { name: 'Brown rice', unit: 'g', amount: 70 },
       { name: 'Peanut sauce', unit: 'tbsp', amount: 2 },
     ],
+    steps: stepsFor('tofu-stirfry'),
   },
 
   // SNACKS
@@ -330,6 +348,7 @@ export const RECIPES: Recipe[] = [
       { name: 'Apple', unit: 'pcs', amount: 1 },
       { name: 'Almond butter', unit: 'tbsp', amount: 1 },
     ],
+    steps: stepsFor('apple-almond'),
   },
   {
     id: 'yogurt-berries-snack',
@@ -345,6 +364,7 @@ export const RECIPES: Recipe[] = [
       { name: 'Greek yogurt', unit: 'g', amount: 120 },
       { name: 'Mixed berries', unit: 'g', amount: 60 },
     ],
+    steps: stepsFor('yogurt-berries-snack'),
   },
   {
     id: 'hummus-veg-snack',
@@ -360,6 +380,7 @@ export const RECIPES: Recipe[] = [
       { name: 'Hummus', unit: 'g', amount: 80 },
       { name: 'Carrots', unit: 'g', amount: 120 },
     ],
+    steps: stepsFor('hummus-veg-snack'),
   },
   {
     id: 'cottage-crackers',
@@ -375,6 +396,7 @@ export const RECIPES: Recipe[] = [
       { name: 'Cottage cheese', unit: 'g', amount: 150 },
       { name: 'Rice cakes', unit: 'pcs', amount: 2 },
     ],
+    steps: stepsFor('cottage-crackers'),
   },
   {
     id: 'walnut-chocolate',
@@ -390,5 +412,6 @@ export const RECIPES: Recipe[] = [
       { name: 'Walnuts', unit: 'g', amount: 25 },
       { name: 'Dark chocolate', unit: 'g', amount: 20 },
     ],
+    steps: stepsFor('walnut-chocolate'),
   },
 ];

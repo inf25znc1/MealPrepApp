@@ -1,3 +1,4 @@
+import { ui } from '../i18n';
 import { nextColorSlot } from '../data/personColors';
 import { PERIOD_A_META, PERIOD_B_META } from '../data/periods';
 import { RECIPES } from '../data/recipes';
@@ -27,7 +28,7 @@ export const initialState: AppState = {
   people: [
     {
       id: 'p1',
-      name: 'You',
+      name: ui.defaultYou,
       cals: 2100,
       diet: 'balanced',
       excludes: [],
@@ -35,7 +36,7 @@ export const initialState: AppState = {
     },
     {
       id: 'p2',
-      name: 'Partner',
+      name: ui.defaultPartner,
       cals: 1800,
       diet: 'mediterranean',
       excludes: ['seafood'],
@@ -114,7 +115,7 @@ export function reducer(state: AppState, action: Action): AppState {
       const n = state.people.length + 1;
       const newPerson: Person = {
         id: `p${Date.now()}`,
-        name: `Person ${n}`,
+        name: ui.newPersonName(n),
         cals: 2000,
         diet: 'balanced',
         excludes: [],

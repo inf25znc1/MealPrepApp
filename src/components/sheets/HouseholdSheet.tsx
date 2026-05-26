@@ -1,6 +1,7 @@
 import { Drawer } from 'vaul';
 import { IconX, IconTrash, IconPlus } from '@tabler/icons-react';
 import { DIETS, EXCLUSIONS } from '../../data/constants';
+import { dietLabel, exclusionLabel, ui } from '../../i18n';
 import type { Exclusion } from '../../domain/types';
 import { useApp } from '../../state/AppContext';
 
@@ -32,10 +33,10 @@ export function HouseholdSheet({ open, onOpenChange }: HouseholdSheetProps) {
           <Drawer.Handle className="mx-auto mb-3.5 w-9 h-1 rounded-full bg-border-secondary" />
           <div className="overflow-y-auto flex-1">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-medium">Household</h2>
+              <h2 className="text-lg font-medium">{ui.household}</h2>
               <button
                 type="button"
-                aria-label="Close"
+                aria-label={ui.close}
                 className="flex items-center justify-center w-11 h-11"
                 onClick={() => onOpenChange(false)}
               >
@@ -66,7 +67,7 @@ export function HouseholdSheet({ open, onOpenChange }: HouseholdSheetProps) {
                   {state.people.length > 1 && (
                     <button
                       type="button"
-                      aria-label={`Remove ${person.name}`}
+                      aria-label={ui.removePerson(person.name)}
                       className="flex items-center justify-center w-11 h-11"
                       onClick={() =>
                         dispatch({
@@ -81,7 +82,7 @@ export function HouseholdSheet({ open, onOpenChange }: HouseholdSheetProps) {
                 </div>
                 <div className="grid grid-cols-2 gap-2 mb-3">
                   <label className="text-xs text-text-secondary">
-                    kcal/day
+                    {ui.kcalPerDayLabel}
                     <input
                       type="number"
                       step={50}
@@ -101,7 +102,7 @@ export function HouseholdSheet({ open, onOpenChange }: HouseholdSheetProps) {
                     />
                   </label>
                   <label className="text-xs text-text-secondary">
-                    Diet
+                    {ui.diet}
                     <select
                       value={person.diet}
                       onChange={(e) =>
@@ -119,13 +120,13 @@ export function HouseholdSheet({ open, onOpenChange }: HouseholdSheetProps) {
                     >
                       {DIETS.map((d) => (
                         <option key={d} value={d}>
-                          {d}
+                          {dietLabel(d)}
                         </option>
                       ))}
                     </select>
                   </label>
                 </div>
-                <p className="text-xs text-text-secondary mb-1.5">Avoids</p>
+                <p className="text-xs text-text-secondary mb-1.5">{ui.avoids}</p>
                 <div className="flex flex-wrap gap-1.5">
                   {EXCLUSIONS.map((ex) => (
                     <label
@@ -139,7 +140,7 @@ export function HouseholdSheet({ open, onOpenChange }: HouseholdSheetProps) {
                           toggleExclusion(person.id, ex, e.target.checked)
                         }
                       />
-                      {ex}
+                      {exclusionLabel(ex)}
                     </label>
                   ))}
                 </div>
@@ -152,7 +153,7 @@ export function HouseholdSheet({ open, onOpenChange }: HouseholdSheetProps) {
               className="flex items-center justify-center gap-2 w-full py-2.5 rounded-md border-dashed border-[0.5px] border-border-secondary bg-transparent text-sm"
             >
               <IconPlus size={18} aria-hidden />
-              Add person
+              {ui.addPerson}
             </button>
           </div>
         </Drawer.Content>

@@ -107,7 +107,7 @@ export function DailyIntakeCard() {
         {state.people.map((person) => (
           <div
             key={person.id}
-            className="rounded-lg bg-bg-secondary p-4"
+            className="rounded-lg border-[0.5px] border-border-tertiary bg-bg-primary p-4"
           >
             {state.plan ? (
               <>
