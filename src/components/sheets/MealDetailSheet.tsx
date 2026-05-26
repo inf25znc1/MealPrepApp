@@ -5,7 +5,11 @@ import {
   IconLockOpen,
   IconRefresh,
 } from '@tabler/icons-react';
-import { personScale, personMacros } from '../../domain/scaling';
+import { personMacros } from '../../domain/scaling';
+import {
+  mealIngredientPortions,
+  personIngredientPortions,
+} from '../../domain/portions';
 import type { MealType, PeriodKey } from '../../domain/types';
 import { useApp } from '../../state/AppContext';
 
@@ -14,6 +18,15 @@ interface MealDetailSheetProps {
   onOpenChange: (open: boolean) => void;
   periodKey: PeriodKey | null;
   mealType: MealType | null;
+}
+
+function formatAmount(amount: number, unit: string): string {
+  return `${amount} ${unit}`;
+}
+
+function formatGrams(grams: number | null): string {
+  if (grams === null) return '—';
+  return `${grams} g`;
 }
 
 export function MealDetailSheet({
@@ -29,21 +42,21 @@ export function MealDetailSheet({
   const slot =
     period && mealType ? period.meals[mealType] : null;
 
-  const ingredientRows =
+  const portionLines =
     slot && period
-      ? slot.recipe.ingredients.map((ing) => {
-          let qty = 0;
-          for (const person of state.people) {
-            qty += ing.amount * personScale(person, slot.recipe);
-          }
-          qty = Math.round(qty * period.days * 10) / 10;
-          if (ing.unit === 'g' || ing.unit === 'ml') qty = Math.round(qty);
-          return { ...ing, qty };
-        })
+      ? mealIngredientPortions(
+          slot.recipe,
+          state.people,
+          period.days,
+          state.activePersonId,
+        )
       : [];
 
   const daysLabel = period?.days === 1 ? 'day' : 'days';
   const peopleLabel = state.people.length === 1 ? 'person' : 'people';
+  const activePerson = state.people.find(
+    (p) => p.id === state.activePersonId,
+  );
 
   return (
     <Drawer.Root open={open} onOpenChange={onOpenChange}>
@@ -59,6 +72,10 @@ export function MealDetailSheet({
                     {period.label} · {mealType}
                   </p>
                   <h3 className="text-lg font-medium">{slot.recipe.name}</h3>
+                  <p className="text-xs text-text-secondary mt-1">
+                    Cooked in one batch, divided into {state.people.length}{' '}
+                    {peopleLabel}
+                  </p>
                 </div>
                 <button
                   type="button"
@@ -71,11 +88,23 @@ export function MealDetailSheet({
               </div>
 
               <p className="text-[11px] uppercase tracking-[0.5px] text-text-secondary mb-2">
-                Nutrition per person
+                Nutrition per person (from raw ingredients)
               </p>
               <div className="flex flex-col gap-2 mb-4">
                 {state.people.map((person) => {
                   const m = personMacros(person, slot.recipe);
+                  let portionGrams = 0;
+                  let allGrams = true;
+                  for (const ing of slot.recipe.ingredients) {
+                    const shares = personIngredientPortions(
+                      ing,
+                      slot.recipe,
+                      [person],
+                    );
+                    const g = shares[0]?.grams;
+                    if (g !== null) portionGrams += g;
+                    else allGrams = false;
+                  }
                   const active = person.id === state.activePersonId;
                   return (
                     <div
@@ -87,7 +116,8 @@ export function MealDetailSheet({
                       <div>
                         <p className="text-[13px] font-medium">{person.name}</p>
                         <p className="text-[11px] text-text-secondary">
-                          {Math.round(m.factor * 100)}% portion
+                          {Math.round(m.factor * 100)}% of reference batch
+                          {allGrams ? ` · ${portionGrams} g total` : ''}
                         </p>
                       </div>
                       <div className="text-right">
@@ -102,19 +132,59 @@ export function MealDetailSheet({
               </div>
 
               <p className="text-[11px] uppercase tracking-[0.5px] text-text-secondary mb-2">
-                Raw ingredients · {period.days} {daysLabel},{' '}
-                {state.people.length} {peopleLabel}
+                One batch cook · portions for {activePerson?.name ?? 'you'}
               </p>
               <table className="w-full text-sm mb-4">
+                <thead>
+                  <tr className="text-[11px] text-text-secondary text-left">
+                    <th className="pb-1 font-normal">Ingredient</th>
+                    <th className="pb-1 font-normal text-right">Per person</th>
+                    <th className="pb-1 font-normal text-right">Batch total</th>
+                  </tr>
+                </thead>
                 <tbody>
-                  {ingredientRows.map((row) => (
+                  {portionLines.map((row) => (
                     <tr
                       key={row.name}
                       className="border-b-[0.5px] border-border-tertiary"
                     >
+                      <td className="py-2 pr-2">{row.name}</td>
+                      <td className="py-2 text-right text-text-secondary tabular-nums">
+                        {row.perPersonGrams !== null ? (
+                          formatGrams(row.perPersonGrams)
+                        ) : (
+                          formatAmount(row.perPersonAmount, row.unit)
+                        )}
+                      </td>
+                      <td className="py-2 text-right text-text-secondary tabular-nums">
+                        {row.batchTotalGrams !== null ? (
+                          formatGrams(row.batchTotalGrams)
+                        ) : (
+                          formatAmount(row.batchTotalAmount, row.unit)
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <p className="text-[11px] uppercase tracking-[0.5px] text-text-secondary mb-2">
+                Period prep · {period.days} {daysLabel}
+              </p>
+              <table className="w-full text-sm mb-4">
+                <tbody>
+                  {portionLines.map((row) => (
+                    <tr
+                      key={`period-${row.name}`}
+                      className="border-b-[0.5px] border-border-tertiary"
+                    >
                       <td className="py-2">{row.name}</td>
                       <td className="py-2 text-right text-text-secondary tabular-nums">
-                        {row.qty} {row.unit}
+                        {row.periodTotalGrams !== null ? (
+                          formatGrams(row.periodTotalGrams)
+                        ) : (
+                          formatAmount(row.periodTotalAmount, row.unit)
+                        )}
                       </td>
                     </tr>
                   ))}

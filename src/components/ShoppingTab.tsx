@@ -1,6 +1,18 @@
 import { aggregateShopping } from '../domain/shopping';
 import { useApp } from '../state/AppContext';
 
+function formatShoppingQty(
+  qty: number,
+  unit: string,
+  qtyGrams: number | null,
+): string {
+  if (qtyGrams !== null) {
+    if (unit === 'g' || unit === 'ml') return `${qtyGrams} g`;
+    return `${qty} ${unit} (${qtyGrams} g)`;
+  }
+  return `${qty} ${unit}`;
+}
+
 export function ShoppingTab() {
   const { state } = useApp();
 
@@ -21,7 +33,7 @@ export function ShoppingTab() {
   return (
     <div className="p-3.5">
       <p className="text-xs text-text-secondary mb-2.5">
-        For {n} {peopleLabel} · 7 days · auto-updates with your menu
+        For {n} {peopleLabel} · 7 days · batch totals from raw ingredients
       </p>
       <ul className="m-0 p-0 list-none">
         {items.map((item) => (
@@ -30,8 +42,8 @@ export function ShoppingTab() {
             className="flex justify-between py-2.75 text-sm border-b-[0.5px] border-border-tertiary"
           >
             <span>{item.name}</span>
-            <span className="text-text-secondary tabular-nums">
-              {item.qty} {item.unit}
+            <span className="text-text-secondary tabular-nums text-right">
+              {formatShoppingQty(item.qty, item.unit, item.qtyGrams)}
             </span>
           </li>
         ))}

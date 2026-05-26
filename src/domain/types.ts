@@ -27,7 +27,8 @@ export interface Person {
 export interface Ingredient {
   name: string;
   unit: Unit;
-  amount: number; // per-person amount at the recipe's base portion
+  /** Reference serving (one person at recipe base kcal); batch = sum of scaled shares. */
+  amount: number;
 }
 
 export interface Recipe {
@@ -93,4 +94,6 @@ export interface ShoppingItem {
   name: string;
   unit: Unit;
   qty: number;
+  /** Total grams for the week when all amounts convert to weight. */
+  qtyGrams: number | null;
 }

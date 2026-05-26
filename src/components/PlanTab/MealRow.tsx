@@ -7,6 +7,7 @@ import {
   IconRefresh,
 } from '@tabler/icons-react';
 import { personMacros } from '../../domain/scaling';
+import { personMealPortionGrams } from '../../domain/portions';
 import type { MealSlot, MealType, PeriodKey } from '../../domain/types';
 import { useApp } from '../../state/AppContext';
 
@@ -32,6 +33,9 @@ export function MealRow({
   const { state, dispatch } = useApp();
   const person = state.people.find((p) => p.id === state.activePersonId);
   const macros = person ? personMacros(person, slot.recipe) : null;
+  const portionGrams = person
+    ? personMealPortionGrams(person, slot.recipe)
+    : null;
   const Icon = MEAL_ICONS[mealType];
 
   return (
@@ -57,8 +61,8 @@ export function MealRow({
         <p className="text-sm font-medium truncate">{slot.recipe.name}</p>
         {macros && person && (
           <p className="text-xs text-text-secondary">
-            {macros.kcal} kcal · {macros.p}P {macros.c}C {macros.f}F ·{' '}
-            {person.name}
+            {macros.kcal} kcal · {macros.p}P {macros.c}C {macros.f}F
+            {portionGrams !== null ? ` · ${portionGrams} g` : ''} · {person.name}
           </p>
         )}
       </div>

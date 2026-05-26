@@ -1,8 +1,8 @@
 import type { Recipe } from '../domain/types';
 
-// Per-person amounts at the listed base kcal.
-// To add a recipe: write per-person ingredient amounts, then compute kcal/p/c/f
-// from USDA FoodData Central (fdc.nal.usda.gov) for that exact portion.
+// Reference serving: ingredient amounts for one person at the listed base kcal.
+// Macros in each recipe should match src/data/foods.ts (USDA per 100 g).
+// At cook time: one batch uses the sum of each person's scaled share; divide into portions.
 
 export const RECIPES: Recipe[] = [
   // BREAKFASTS
