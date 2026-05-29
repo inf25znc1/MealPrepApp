@@ -141,7 +141,7 @@ export function MealDetailSheet({
           <Drawer.Handle className="mx-auto mb-3.5 h-1 w-9 rounded-full bg-border-secondary" />
           {period && slot && mealType && (
             <>
-              <div className="min-h-0 flex-1 overflow-y-auto">
+              <div className="scrollbar-hide min-h-0 flex-1 overflow-y-auto overscroll-contain">
                 <div className="mb-4 flex items-start justify-between">
                   <div>
                     <p className="text-[11px] uppercase tracking-[0.5px] text-text-secondary">

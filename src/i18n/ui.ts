@@ -65,6 +65,7 @@ export const ui = {
   packageIngredientSearchPlaceholder: 'Пошук або нова назва…',
   createPackageProduct: (name: string) => `Створити «${name}»`,
   packageSizeLabel: 'Упаковка',
+  packageQtyPlaceholder: 'Грами',
   savePackageProduct: 'Зберегти',
   cancel: 'Скасувати',
   packageProductsEmpty: 'Ще немає продуктів з упаковкою.',
@@ -72,6 +73,7 @@ export const ui = {
 
   favoritesIntro:
     'Зберігайте страви з плану або додавайте власні — потім можна підставити їх у тижневий план.',
+  favoriteRecipeMacros: 'Поживність (з інгредієнтів)',
   favoritesEmpty: 'Ще немає улюблених рецептів.',
   addCustomRecipe: 'Додати власний рецепт',
   saveAsFavorite: 'Зберегти в улюблені',

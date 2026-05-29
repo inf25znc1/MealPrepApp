@@ -100,7 +100,7 @@ export function HouseholdSheet({ open, onOpenChange }: HouseholdSheetProps) {
             </div>
           </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4">
+          <div className="scrollbar-hide min-h-0 flex-1 overflow-y-auto overscroll-contain px-4">
             {tab === 'people' && (
               <>
                 {state.people.map((person) => (

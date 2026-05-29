@@ -20,13 +20,13 @@ export function PackageProductsPanel({
   const { state, dispatch } = useApp();
   const [query, setQuery] = useState('');
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
-  const [packageQty, setPackageQty] = useState('190');
+  const [packageQty, setPackageQty] = useState('');
 
   const resetForm = () => {
     onFormOpenChange(false);
     setQuery('');
     setSelectedKey(null);
-    setPackageQty('190');
+    setPackageQty('');
   };
 
   const saveProduct = () => {
@@ -69,8 +69,9 @@ export function PackageProductsPanel({
                 min={1}
                 step={1}
                 value={packageQty}
+                placeholder={ui.packageQtyPlaceholder}
                 onChange={(e) => setPackageQty(e.target.value)}
-                className="min-w-0 flex-1 border-0 bg-transparent py-1.5 pr-2.5 text-sm tabular-nums focus:outline-none"
+                className="min-w-0 flex-1 border-0 bg-transparent py-1.5 pr-2.5 text-sm tabular-nums placeholder:text-text-tertiary focus:outline-none"
               />
             </div>
           </label>

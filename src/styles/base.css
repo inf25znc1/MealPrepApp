@@ -40,3 +40,13 @@ body {
     @apply flex items-center justify-center gap-2 rounded-lg bg-text-primary text-sm font-medium text-bg-primary disabled:opacity-60;
   }
 }
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
