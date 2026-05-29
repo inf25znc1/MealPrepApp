@@ -54,7 +54,7 @@ function sumMacros(items: DailyTargets[]): DailyTargets {
   };
 }
 
-/** Macros for one reference serving (recipe base portion) from raw ingredients. */
+/** Sum macros from ingredient amounts as stored (reference or batch, depending on recipe). */
 export function recipeMacrosFromIngredients(recipe: Recipe): DailyTargets | null {
   const parts: DailyTargets[] = [];
   for (const ing of recipe.ingredients) {

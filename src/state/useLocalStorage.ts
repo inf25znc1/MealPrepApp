@@ -1,9 +1,15 @@
 import { useEffect, useRef } from 'react';
 
-export function useDebouncedStorage<T>(key: string, value: T, delayMs = 300): void {
+/** Pass `null` to skip writing (e.g. until localStorage has been loaded). */
+export function useDebouncedStorage<T>(
+  key: string,
+  value: T | null,
+  delayMs = 300,
+): void {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
+    if (value === null) return;
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(() => {
       try {

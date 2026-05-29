@@ -1,6 +1,6 @@
 import { RECIPES } from './recipes';
 
-/** Compact catalog for Gemini prompts and API validation. */
+/** Compact catalog for Gemini prompts and API validation (meal-prep only). */
 export function recipeCatalogForPrompt() {
   return RECIPES.map((r) => ({
     id: r.id,
@@ -8,6 +8,7 @@ export function recipeCatalogForPrompt() {
     tags: r.tags,
     excl: r.excl,
     kcal: r.kcal,
+    mealPrep: true,
   }));
 }
 

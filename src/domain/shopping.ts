@@ -3,10 +3,17 @@ import {
   shoppingCategoryForIngredient,
   SHOPPING_CATEGORY_ORDER,
 } from '../data/shoppingCategories';
+import { batchIngredientAmount } from './batch';
+import { applyPackageRounding } from './packages';
 import type { ShoppingCategory } from './types';
-import { personScale } from './scaling';
 import { amountToGrams, roundGrams, roundQty } from './nutrition';
-import type { Person, Plan, ShoppingItem, Unit } from './types';
+import type {
+  PackageProduct,
+  Person,
+  Plan,
+  ShoppingItem,
+  Unit,
+} from './types';
 
 export function shoppingItemId(name: string): string {
   return foodKey(name);
@@ -79,6 +86,7 @@ function accumulatorToItem(acc: Accumulator): ShoppingItem {
 export function aggregateShopping(
   plan: Plan,
   people: Person[],
+  packageProducts: PackageProduct[] = [],
 ): ShoppingItem[] {
   const acc = new Map<string, Accumulator>();
 
@@ -86,11 +94,12 @@ export function aggregateShopping(
     for (const slot of Object.values(period.meals)) {
       for (const ing of slot.recipe.ingredients) {
         const key = foodKey(ing.name);
-        let batchAmount = 0;
-        for (const person of people) {
-          batchAmount += ing.amount * personScale(person, slot.recipe);
-        }
-        const qty = batchAmount * period.days;
+        const qty = batchIngredientAmount(
+          ing,
+          slot.recipe,
+          people,
+          period.days,
+        );
 
         if (!acc.has(key)) {
           acc.set(key, { name: ing.name, totalGrams: 0, byUnit: new Map() });
@@ -100,9 +109,22 @@ export function aggregateShopping(
     }
   }
 
-  return [...acc.values()]
+  const items = [...acc.values()]
     .map(accumulatorToItem)
-    .sort((a, b) => a.name.localeCompare(b.name));
+    .map((item) => applyPackageRounding(item, packageProducts));
+
+  items.sort((a, b) => {
+    const catA = SHOPPING_CATEGORY_ORDER.indexOf(
+      a.category as ShoppingCategory,
+    );
+    const catB = SHOPPING_CATEGORY_ORDER.indexOf(
+      b.category as ShoppingCategory,
+    );
+    if (catA !== catB) return catA - catB;
+    return a.name.localeCompare(b.name);
+  });
+
+  return items;
 }
 
 export function groupShoppingByCategory(

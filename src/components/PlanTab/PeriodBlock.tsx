@@ -3,9 +3,20 @@ import { periodLabel, ui } from '../../i18n';
 import { PersonLabel } from '../PersonMacroPill';
 import { PersonMacroValues } from '../PersonMacroValues';
 import { dailyActualFor } from '../../domain/intake';
-import type { MealType, Period } from '../../domain/types';
+import type { MealType, Period, Plan } from '../../domain/types';
 import { useApp } from '../../state/AppContext';
 import { MealRow } from './MealRow';
+
+function collectRecipeNames(plan: Plan | null): string[] {
+  if (!plan) return [];
+  const names = new Set<string>();
+  for (const pk of ['A', 'B'] as const) {
+    for (const mealType of MEAL_TYPES) {
+      names.add(plan[pk].meals[mealType].recipe.name);
+    }
+  }
+  return [...names];
+}
 
 interface PeriodBlockProps {
   period: Period;
@@ -14,6 +25,7 @@ interface PeriodBlockProps {
 
 export function PeriodBlock({ period, onOpenMealDetail }: PeriodBlockProps) {
   const { state } = useApp();
+  const avoidRecipeNames = collectRecipeNames(state.plan);
 
   const meals = MEAL_TYPES.map((mealType) => [mealType, period.meals[mealType]] as const);
 
@@ -23,7 +35,7 @@ export function PeriodBlock({ period, onOpenMealDetail }: PeriodBlockProps) {
         <h2 className="text-[15px] font-medium">{periodLabel(period.key)}</h2>
         <div className="flex flex-col gap-1 rounded-lg bg-bg-secondary p-3">
           {state.people.map((person) => {
-            const daily = dailyActualFor(person, period);
+            const daily = dailyActualFor(person, period, state.people);
             return (
               <div
                 key={person.id}
@@ -43,6 +55,8 @@ export function PeriodBlock({ period, onOpenMealDetail }: PeriodBlockProps) {
             periodKey={period.key}
             mealType={mealType}
             slot={slot}
+            periodDays={period.days}
+            avoidRecipeNames={avoidRecipeNames}
             onOpenDetail={onOpenMealDetail}
           />
         ))}

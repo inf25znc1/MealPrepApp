@@ -3,6 +3,7 @@ import {
   useContext,
   useReducer,
   useEffect,
+  useState,
   type ReactNode,
   type Dispatch,
 } from 'react';
@@ -21,24 +22,29 @@ export const AppContext = createContext<AppContextValue | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw) as AppState;
-      if (parsed && Array.isArray(parsed.people)) {
-        dispatch({
-          type: 'HYDRATE',
-          payload: migrateAppState(parsed),
-        });
+      if (raw) {
+        const parsed = JSON.parse(raw) as AppState;
+        if (parsed && Array.isArray(parsed.people)) {
+          dispatch({
+            type: 'HYDRATE',
+            payload: migrateAppState(parsed),
+          });
+        }
       }
     } catch {
       // invalid JSON — keep defaults
+    } finally {
+      setHydrated(true);
     }
   }, []);
 
-  useDebouncedStorage(STORAGE_KEY, state);
+  // Wait until hydrate finishes so defaults don't overwrite saved settings on first open.
+  useDebouncedStorage(STORAGE_KEY, hydrated ? state : null);
 
   return (
     <AppContext.Provider value={{ state, dispatch }}>

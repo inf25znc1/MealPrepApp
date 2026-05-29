@@ -29,7 +29,7 @@ export interface Person {
 export interface Ingredient {
   name: string;
   unit: Unit;
-  /** Reference serving (one person at recipe base kcal); batch = sum of scaled shares. */
+  /** Period batch total (all people × all days in period); legacy favorites may be per-person reference. */
   amount: number;
 }
 
@@ -37,12 +37,14 @@ export interface Recipe {
   id: string;
   name: string;
   meal: MealType;
-  kcal: number; // per person at base portion
-  p: number; // protein g per person
-  c: number; // carbs g per person
-  f: number; // fat g per person
+  kcal: number; // batch total from ingredients (or legacy per-person reference)
+  p: number;
+  c: number;
+  f: number;
   tags: DietStyle[]; // diet styles this recipe fits
   excl: Exclusion[]; // exclusions this recipe triggers
+  /** Batch-cook once per period; stores and reheats well for several days. */
+  mealPrep: boolean;
   ingredients: Ingredient[];
   steps: string[];
 }
@@ -67,6 +69,15 @@ export interface Plan {
   B: Period;
 }
 
+/** User-defined retail package for an ingredient (e.g. 190 g cottage cheese tub). */
+export interface PackageProduct {
+  /** Stable id — `foodKey(name)`. */
+  id: string;
+  name: string;
+  packageQty: number;
+  unit: Unit;
+}
+
 export interface AppState {
   people: Person[];
   plan: Plan | null;
@@ -74,6 +85,10 @@ export interface AppState {
   activePersonId: string;
   /** Checked shopping list items keyed by shopping item id. */
   checkedShopping: Record<string, boolean>;
+  /** Ingredients bought only in fixed package sizes — shopping rounds up. */
+  packageProducts: PackageProduct[];
+  /** User-saved and custom recipes (local library). */
+  favoriteRecipes: Recipe[];
 }
 
 export interface PersonMacros {
@@ -109,4 +124,8 @@ export interface ShoppingItem {
   /** Total grams for the week when all amounts convert to weight. */
   qtyGrams: number | null;
   category: ShoppingCategory;
+  /** Set when qty was rounded up to full user-defined packages. */
+  packageCount?: number;
+  packageSize?: number;
+  packageUnit?: Unit;
 }

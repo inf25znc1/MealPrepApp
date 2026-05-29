@@ -1,11 +1,12 @@
 import type { Recipe } from '../domain/types';
 import { stepsFor } from './recipeSteps';
 
-// Reference serving: ingredient amounts for one person at the listed base kcal.
-// Macros in each recipe should match src/data/foods.ts (USDA per 100 g).
-// At cook time: one batch per period (all days), each person's share × period days.
+// Legacy catalog: ingredient amounts = one person, one meal (reference serving).
+// App converts to period batch when building portions. AI plans use batch totals directly.
+// Macros should match src/data/foods.ts (USDA per 100 g).
+// Every recipe must be meal-prep friendly (batch cook, refrigerate, reheat).
 
-export const RECIPES: Recipe[] = [
+const ALL_RECIPES: Recipe[] = [
   // BREAKFASTS
   {
     id: 'oat-bowl',
@@ -17,6 +18,7 @@ export const RECIPES: Recipe[] = [
     f: 11,
     tags: ['vegetarian', 'mediterranean', 'balanced', 'high-protein'],
     excl: ['dairy'],
+    mealPrep: true,
     ingredients: [
       { name: 'Rolled oats', unit: 'g', amount: 60 },
       { name: 'Greek yogurt', unit: 'g', amount: 150 },
@@ -28,19 +30,20 @@ export const RECIPES: Recipe[] = [
   },
   {
     id: 'eggs-avo',
-    name: 'Eggs & avocado toast',
+    name: 'Scrambled egg & veg boxes',
     meal: 'breakfast',
     kcal: 480,
     p: 24,
-    c: 32,
+    c: 28,
     f: 28,
     tags: ['balanced', 'mediterranean', 'high-protein'],
-    excl: ['gluten'],
+    excl: [],
+    mealPrep: true,
     ingredients: [
       { name: 'Eggs', unit: 'pcs', amount: 2 },
-      { name: 'Sourdough', unit: 'slice', amount: 2 },
       { name: 'Avocado', unit: 'pcs', amount: 0.5 },
       { name: 'Cherry tomatoes', unit: 'g', amount: 80 },
+      { name: 'Spinach', unit: 'g', amount: 40 },
       { name: 'Olive oil', unit: 'tsp', amount: 1 },
     ],
     steps: stepsFor('eggs-avo'),
@@ -55,6 +58,7 @@ export const RECIPES: Recipe[] = [
     f: 20,
     tags: ['vegetarian', 'high-protein', 'low-carb', 'balanced'],
     excl: [],
+    mealPrep: true,
     ingredients: [
       { name: 'Firm tofu', unit: 'g', amount: 150 },
       { name: 'Spinach', unit: 'g', amount: 60 },
@@ -74,6 +78,7 @@ export const RECIPES: Recipe[] = [
     f: 16,
     tags: ['vegetarian', 'mediterranean', 'balanced'],
     excl: [],
+    mealPrep: true,
     ingredients: [
       { name: 'Chia seeds', unit: 'g', amount: 40 },
       { name: 'Oat milk', unit: 'ml', amount: 250 },
@@ -92,6 +97,7 @@ export const RECIPES: Recipe[] = [
     f: 12,
     tags: ['vegetarian', 'high-protein', 'balanced'],
     excl: ['dairy', 'gluten'],
+    mealPrep: true,
     ingredients: [
       { name: 'Oat flour', unit: 'g', amount: 60 },
       { name: 'Banana', unit: 'pcs', amount: 1 },
@@ -112,6 +118,7 @@ export const RECIPES: Recipe[] = [
     f: 16,
     tags: ['balanced', 'high-protein', 'mediterranean'],
     excl: [],
+    mealPrep: true,
     ingredients: [
       { name: 'Chicken breast', unit: 'g', amount: 180 },
       { name: 'Brown rice', unit: 'g', amount: 80 },
@@ -131,6 +138,7 @@ export const RECIPES: Recipe[] = [
     f: 24,
     tags: ['balanced', 'high-protein', 'mediterranean'],
     excl: ['seafood'],
+    mealPrep: true,
     ingredients: [
       { name: 'Salmon fillet', unit: 'g', amount: 160 },
       { name: 'Quinoa', unit: 'g', amount: 70 },
@@ -142,17 +150,18 @@ export const RECIPES: Recipe[] = [
   },
   {
     id: 'turkey-wrap',
-    name: 'Turkey & hummus wrap',
+    name: 'Turkey & hummus grain bowl',
     meal: 'lunch',
     kcal: 560,
     p: 38,
-    c: 52,
+    c: 54,
     f: 18,
     tags: ['balanced', 'high-protein'],
     excl: ['gluten'],
+    mealPrep: true,
     ingredients: [
       { name: 'Turkey breast', unit: 'g', amount: 140 },
-      { name: 'Tortilla', unit: 'pcs', amount: 1 },
+      { name: 'Brown rice', unit: 'g', amount: 70 },
       { name: 'Hummus', unit: 'g', amount: 60 },
       { name: 'Spinach', unit: 'g', amount: 40 },
       { name: 'Bell pepper', unit: 'g', amount: 60 },
@@ -169,6 +178,7 @@ export const RECIPES: Recipe[] = [
     f: 22,
     tags: ['vegetarian', 'mediterranean', 'balanced'],
     excl: ['dairy'],
+    mealPrep: true,
     ingredients: [
       { name: 'Chickpeas', unit: 'g', amount: 180 },
       { name: 'Cucumber', unit: 'g', amount: 100 },
@@ -188,6 +198,7 @@ export const RECIPES: Recipe[] = [
     f: 26,
     tags: ['balanced', 'high-protein', 'low-carb'],
     excl: [],
+    mealPrep: true,
     ingredients: [
       { name: 'Lean beef', unit: 'g', amount: 160 },
       { name: 'Bell pepper', unit: 'g', amount: 100 },
@@ -207,6 +218,7 @@ export const RECIPES: Recipe[] = [
     f: 10,
     tags: ['vegetarian', 'mediterranean', 'balanced'],
     excl: [],
+    mealPrep: true,
     ingredients: [
       { name: 'Red lentils', unit: 'g', amount: 100 },
       { name: 'Carrots', unit: 'g', amount: 100 },
@@ -228,6 +240,7 @@ export const RECIPES: Recipe[] = [
     f: 28,
     tags: ['balanced', 'high-protein'],
     excl: ['pork'],
+    mealPrep: true,
     ingredients: [
       { name: 'Pork loin', unit: 'g', amount: 180 },
       { name: 'Sweet potato', unit: 'g', amount: 200 },
@@ -247,6 +260,7 @@ export const RECIPES: Recipe[] = [
     f: 16,
     tags: ['balanced', 'high-protein', 'mediterranean', 'low-carb'],
     excl: ['seafood'],
+    mealPrep: true,
     ingredients: [
       { name: 'Cod fillet', unit: 'g', amount: 180 },
       { name: 'Zucchini', unit: 'g', amount: 150 },
@@ -266,6 +280,7 @@ export const RECIPES: Recipe[] = [
     f: 22,
     tags: ['balanced', 'high-protein', 'mediterranean'],
     excl: ['gluten', 'dairy'],
+    mealPrep: true,
     ingredients: [
       { name: 'Chicken breast', unit: 'g', amount: 160 },
       { name: 'Whole wheat pasta', unit: 'g', amount: 90 },
@@ -285,6 +300,7 @@ export const RECIPES: Recipe[] = [
     f: 24,
     tags: ['vegetarian', 'balanced'],
     excl: [],
+    mealPrep: true,
     ingredients: [
       { name: 'Chickpeas', unit: 'g', amount: 200 },
       { name: 'Coconut milk', unit: 'ml', amount: 150 },
@@ -304,6 +320,7 @@ export const RECIPES: Recipe[] = [
     f: 26,
     tags: ['balanced', 'high-protein', 'low-carb'],
     excl: [],
+    mealPrep: true,
     ingredients: [
       { name: 'Ground turkey', unit: 'g', amount: 180 },
       { name: 'Zucchini', unit: 'g', amount: 200 },
@@ -323,6 +340,7 @@ export const RECIPES: Recipe[] = [
     f: 24,
     tags: ['vegetarian', 'balanced'],
     excl: [],
+    mealPrep: true,
     ingredients: [
       { name: 'Firm tofu', unit: 'g', amount: 200 },
       { name: 'Broccoli', unit: 'g', amount: 150 },
@@ -344,6 +362,7 @@ export const RECIPES: Recipe[] = [
     f: 10,
     tags: ['balanced', 'vegetarian', 'mediterranean'],
     excl: [],
+    mealPrep: true,
     ingredients: [
       { name: 'Apple', unit: 'pcs', amount: 1 },
       { name: 'Almond butter', unit: 'tbsp', amount: 1 },
@@ -360,6 +379,7 @@ export const RECIPES: Recipe[] = [
     f: 4,
     tags: ['balanced', 'high-protein', 'mediterranean', 'vegetarian'],
     excl: ['dairy'],
+    mealPrep: true,
     ingredients: [
       { name: 'Greek yogurt', unit: 'g', amount: 120 },
       { name: 'Mixed berries', unit: 'g', amount: 60 },
@@ -376,6 +396,7 @@ export const RECIPES: Recipe[] = [
     f: 9,
     tags: ['vegetarian', 'mediterranean', 'balanced'],
     excl: [],
+    mealPrep: true,
     ingredients: [
       { name: 'Hummus', unit: 'g', amount: 80 },
       { name: 'Carrots', unit: 'g', amount: 120 },
@@ -392,6 +413,7 @@ export const RECIPES: Recipe[] = [
     f: 5,
     tags: ['balanced', 'high-protein', 'low-carb'],
     excl: ['dairy', 'gluten'],
+    mealPrep: true,
     ingredients: [
       { name: 'Cottage cheese', unit: 'g', amount: 150 },
       { name: 'Rice cakes', unit: 'pcs', amount: 2 },
@@ -408,6 +430,7 @@ export const RECIPES: Recipe[] = [
     f: 18,
     tags: ['vegetarian', 'mediterranean', 'balanced'],
     excl: ['dairy', 'gluten'],
+    mealPrep: true,
     ingredients: [
       { name: 'Walnuts', unit: 'g', amount: 25 },
       { name: 'Dark chocolate', unit: 'g', amount: 20 },
@@ -415,3 +438,6 @@ export const RECIPES: Recipe[] = [
     steps: stepsFor('walnut-chocolate'),
   },
 ];
+
+/** Meal-prep recipes only (batch cook + refrigerate). */
+export const RECIPES: Recipe[] = ALL_RECIPES.filter((r) => r.mealPrep);

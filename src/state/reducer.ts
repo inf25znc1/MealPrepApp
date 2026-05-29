@@ -1,26 +1,27 @@
 import { ui } from '../i18n';
 import { nextColorSlot } from '../data/personColors';
-import { PERIOD_A_META, PERIOD_B_META } from '../data/periods';
-import { RECIPES } from '../data/recipes';
+import { buildPlanFromAiMeals, type AiWeekMeals } from '../domain/aiPlan';
 import { migrateAppState } from '../domain/migrate';
+import { foodKey } from '../data/foods';
 import {
-  buildPeriodFromPicker,
-  buildPlanFromPicks,
-  rerollMeal,
-} from '../domain/picker';
-import type { MealPicks } from '../domain/mealPicks';
+  cloneRecipeForFavorite,
+  syncRecipeMacros,
+} from '../domain/favorites';
 import type {
   AppState,
+  PackageProduct,
   Person,
   PeriodKey,
   MealType,
-  Plan,
+  Recipe,
 } from '../domain/types';
 
 export type Action =
-  | { type: 'GENERATE_PLAN' }
-  | { type: 'GENERATE_PLAN_WITH_PICKS'; payload: MealPicks }
-  | { type: 'REROLL_MEAL'; payload: { periodKey: PeriodKey; mealType: MealType } }
+  | { type: 'GENERATE_PLAN_WITH_AI'; payload: AiWeekMeals }
+  | {
+      type: 'SET_MEAL_FROM_AI';
+      payload: { periodKey: PeriodKey; mealType: MealType; recipe: Recipe };
+    }
   | { type: 'TOGGLE_LOCK'; payload: { periodKey: PeriodKey; mealType: MealType } }
   | { type: 'SET_ACTIVE_TAB'; payload: 'plan' | 'shop' }
   | { type: 'SET_ACTIVE_PERSON'; payload: string }
@@ -28,6 +29,19 @@ export type Action =
   | { type: 'REMOVE_PERSON'; payload: string }
   | { type: 'UPDATE_PERSON'; payload: { id: string; patch: Partial<Person> } }
   | { type: 'TOGGLE_SHOPPING_CHECK'; payload: { itemId: string } }
+  | { type: 'ADD_PACKAGE_PRODUCT'; payload: { name: string; packageQty: number } }
+  | { type: 'REMOVE_PACKAGE_PRODUCT'; payload: string }
+  | { type: 'SAVE_FAVORITE_RECIPE'; payload: Recipe }
+  | { type: 'ADD_FAVORITE_RECIPE'; payload: Recipe }
+  | { type: 'REMOVE_FAVORITE_RECIPE'; payload: string }
+  | {
+      type: 'REPLACE_MEAL_WITH_FAVORITE';
+      payload: {
+        periodKey: PeriodKey;
+        mealType: MealType;
+        favoriteId: string;
+      };
+    }
   | { type: 'HYDRATE'; payload: AppState };
 
 export const initialState: AppState = {
@@ -53,55 +67,45 @@ export const initialState: AppState = {
   activeTab: 'plan',
   activePersonId: 'p1',
   checkedShopping: {},
+  packageProducts: [],
+  favoriteRecipes: [],
 };
-
-function buildFullPlan(state: AppState): Plan {
-  const existing = state.plan;
-  return {
-    A: buildPeriodFromPicker(
-      PERIOD_A_META,
-      existing?.A.meals ?? null,
-      state.people,
-      RECIPES,
-    ),
-    B: buildPeriodFromPicker(
-      PERIOD_B_META,
-      existing?.B.meals ?? null,
-      state.people,
-      RECIPES,
-    ),
-  };
-}
 
 export function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
-    case 'GENERATE_PLAN':
-      return { ...state, plan: buildFullPlan(state), checkedShopping: {} };
-
-    case 'GENERATE_PLAN_WITH_PICKS':
+    case 'GENERATE_PLAN_WITH_AI':
       return {
         ...state,
-        plan: buildPlanFromPicks(
-          state.plan,
-          state.people,
-          RECIPES,
-          action.payload,
-        ),
+        plan: buildPlanFromAiMeals(state.plan, action.payload),
         checkedShopping: {},
       };
 
-    case 'REROLL_MEAL': {
+    case 'SET_MEAL_FROM_AI': {
       if (!state.plan) return state;
-      const { periodKey, mealType } = action.payload;
+      const { periodKey, mealType, recipe } = action.payload;
+      const period = state.plan[periodKey];
+      const slot = period.meals[mealType];
+      if (slot.locked) return state;
       return {
         ...state,
-        plan: rerollMeal(
-          state.plan,
-          periodKey,
-          mealType,
-          state.people,
-          RECIPES,
-        ),
+        plan: {
+          ...state.plan,
+          [periodKey]: {
+            ...period,
+            meals: {
+              ...period.meals,
+              [mealType]: {
+                recipe: {
+                  ...recipe,
+                  meal: mealType,
+                  ingredients: recipe.ingredients.map((i) => ({ ...i })),
+                  steps: [...recipe.steps],
+                },
+                locked: false,
+              },
+            },
+          },
+        },
       };
     }
 
@@ -157,6 +161,87 @@ export function reducer(state: AppState, action: Action): AppState {
         p.id === action.payload.id ? { ...p, ...action.payload.patch } : p,
       );
       return { ...state, people };
+    }
+
+    case 'ADD_PACKAGE_PRODUCT': {
+      const { name, packageQty } = action.payload;
+      const id = foodKey(name);
+      const entry: PackageProduct = { id, name, packageQty, unit: 'g' };
+      const rest = state.packageProducts.filter((p) => p.id !== id);
+      return {
+        ...state,
+        packageProducts: [...rest, entry],
+      };
+    }
+
+    case 'REMOVE_PACKAGE_PRODUCT': {
+      return {
+        ...state,
+        packageProducts: state.packageProducts.filter(
+          (p) => p.id !== action.payload,
+        ),
+      };
+    }
+
+    case 'SAVE_FAVORITE_RECIPE': {
+      const cloned = syncRecipeMacros(
+        cloneRecipeForFavorite(action.payload),
+      );
+      if (state.favoriteRecipes.some((r) => r.id === cloned.id)) {
+        return state;
+      }
+      return {
+        ...state,
+        favoriteRecipes: [...state.favoriteRecipes, cloned],
+      };
+    }
+
+    case 'ADD_FAVORITE_RECIPE': {
+      const recipe = syncRecipeMacros(action.payload);
+      const rest = state.favoriteRecipes.filter((r) => r.id !== recipe.id);
+      return {
+        ...state,
+        favoriteRecipes: [...rest, recipe],
+      };
+    }
+
+    case 'REMOVE_FAVORITE_RECIPE': {
+      return {
+        ...state,
+        favoriteRecipes: state.favoriteRecipes.filter(
+          (r) => r.id !== action.payload,
+        ),
+      };
+    }
+
+    case 'REPLACE_MEAL_WITH_FAVORITE': {
+      if (!state.plan) return state;
+      const favorite = state.favoriteRecipes.find(
+        (r) => r.id === action.payload.favoriteId,
+      );
+      if (!favorite) return state;
+      const { periodKey, mealType } = action.payload;
+      const period = state.plan[periodKey];
+      const slot = period.meals[mealType];
+      const recipe: Recipe = {
+        ...favorite,
+        meal: favorite.meal,
+        ingredients: favorite.ingredients.map((i) => ({ ...i })),
+        steps: [...favorite.steps],
+      };
+      return {
+        ...state,
+        plan: {
+          ...state.plan,
+          [periodKey]: {
+            ...period,
+            meals: {
+              ...period.meals,
+              [mealType]: { ...slot, recipe },
+            },
+          },
+        },
+      };
     }
 
     case 'TOGGLE_SHOPPING_CHECK': {

@@ -1,4 +1,5 @@
 import type { Unit } from '../domain/types';
+import { resolveIngredientFoodKey } from './ingredientAliases';
 
 /** USDA FoodData Central values per 100 g (or per 100 ml for liquids). */
 export interface FoodProfile {
@@ -159,10 +160,12 @@ export const FOODS: Record<string, FoodProfile> = {
   'dark chocolate': { kcalPer100g: 546, pPer100g: 5, cPer100g: 61, fPer100g: 31 },
 };
 
-export function foodKey(name: string): string {
-  return name.trim().toLowerCase();
-}
+export const INGREDIENT_KEYS = Object.keys(FOODS).sort((a, b) =>
+  a.localeCompare(b),
+);
+
+export { foodKey } from './foodKey';
 
 export function lookupFood(name: string): FoodProfile | undefined {
-  return FOODS[foodKey(name)];
+  return FOODS[resolveIngredientFoodKey(name)];
 }

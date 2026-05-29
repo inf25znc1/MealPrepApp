@@ -1,13 +1,27 @@
-import { personScale } from './scaling';
+import {
+  batchIngredientAmount,
+  personDailyIngredientAmount,
+} from './batch';
 import { amountToGrams, roundGrams, roundQty } from './nutrition';
 import type { Ingredient, Person, Recipe, Unit } from './types';
 
 /** Raw weight (g) for one person's single meal (one container). */
-export function personMealPortionGrams(person: Person, recipe: Recipe): number | null {
+export function personMealPortionGrams(
+  person: Person,
+  recipe: Recipe,
+  people: Person[],
+  days: number,
+): number | null {
   let total = 0;
   for (const ing of recipe.ingredients) {
-    const scale = personScale(person, recipe);
-    const grams = amountToGrams(ing.amount * scale, ing.unit, ing.name);
+    const amount = personDailyIngredientAmount(
+      ing,
+      person,
+      people,
+      recipe,
+      days,
+    );
+    const grams = amountToGrams(amount, ing.unit, ing.name);
     if (grams === null) return null;
     total += grams;
   }
@@ -30,14 +44,18 @@ export interface IngredientPortionLine {
   periodTotalGrams: number | null;
 }
 
-function scaledShare(
-  baseAmount: number,
-  unit: Unit,
-  name: string,
-  scale: number,
+function dailyCell(
+  ing: Ingredient,
+  person: Person,
+  people: Person[],
+  recipe: Recipe,
+  days: number,
 ): Omit<PersonPortionCell, 'personId'> {
-  const amount = roundQty(baseAmount * scale, unit);
-  const grams = amountToGrams(amount, unit, name);
+  const amount = roundQty(
+    personDailyIngredientAmount(ing, person, people, recipe, days),
+    ing.unit,
+  );
+  const grams = amountToGrams(amount, ing.unit, ing.name);
   return {
     amount,
     grams: grams !== null ? roundGrams(grams) : null,
@@ -53,28 +71,27 @@ export function mealIngredientPortions(
   days: number,
 ): IngredientPortionLine[] {
   return recipe.ingredients.map((ing) => {
-    const byPersonDaily: PersonPortionCell[] = [];
-    let periodTotalAmount = 0;
-    let periodTotalGrams = 0;
-    let hasAllGrams = true;
+    const byPersonDaily: PersonPortionCell[] = people.map((person) => ({
+      personId: person.id,
+      ...dailyCell(ing, person, people, recipe, days),
+    }));
 
-    for (const person of people) {
-      const scale = personScale(person, recipe);
-      const daily = scaledShare(ing.amount, ing.unit, ing.name, scale);
-      byPersonDaily.push({ personId: person.id, ...daily });
-
-      const periodAmount = roundQty(daily.amount * days, ing.unit);
-      periodTotalAmount += periodAmount;
-      if (daily.grams !== null) periodTotalGrams += roundGrams(daily.grams * days);
-      else hasAllGrams = false;
-    }
+    const periodTotalAmount = roundQty(
+      batchIngredientAmount(ing, recipe, people, days),
+      ing.unit,
+    );
+    const periodGrams = amountToGrams(
+      periodTotalAmount,
+      ing.unit,
+      ing.name,
+    );
 
     return {
       name: ing.name,
       unit: ing.unit,
       byPersonDaily,
-      periodTotalAmount: roundQty(periodTotalAmount, ing.unit),
-      periodTotalGrams: hasAllGrams ? roundGrams(periodTotalGrams) : null,
+      periodTotalAmount,
+      periodTotalGrams: periodGrams !== null ? roundGrams(periodGrams) : null,
     };
   });
 }
@@ -84,6 +101,7 @@ export function personIngredientPortions(
   ing: Ingredient,
   recipe: Recipe,
   people: Person[],
+  days: number,
 ): Array<{
   personId: string;
   amount: number;
@@ -91,8 +109,7 @@ export function personIngredientPortions(
   unit: Unit;
 }> {
   return people.map((person) => {
-    const scale = personScale(person, recipe);
-    const daily = scaledShare(ing.amount, ing.unit, ing.name, scale);
+    const daily = dailyCell(ing, person, people, recipe, days);
     return { personId: person.id, ...daily, unit: ing.unit };
   });
 }

@@ -5,6 +5,22 @@ import { RECIPES } from '../data/recipes';
 import { buildPeriodFromPicker } from './picker';
 import type { AppState, Period } from './types';
 
+function migrateFavoriteRecipes(state: AppState): AppState {
+  if (Array.isArray(state.favoriteRecipes)) return state;
+  return { ...state, favoriteRecipes: [] };
+}
+
+function migratePackageProducts(state: AppState): AppState {
+  if (!Array.isArray(state.packageProducts)) {
+    return { ...state, packageProducts: [] };
+  }
+  if (state.packageProducts.every((p) => p.unit === 'g')) return state;
+  return {
+    ...state,
+    packageProducts: state.packageProducts.map((p) => ({ ...p, unit: 'g' })),
+  };
+}
+
 function migrateCheckedShopping(state: AppState): AppState {
   if (state.checkedShopping && typeof state.checkedShopping === 'object') {
     return state;
@@ -47,7 +63,11 @@ function migratePeriodLabels(state: AppState): AppState {
 /** Fill missing meal slots (e.g. snack added after a saved plan). */
 export function migrateAppState(state: AppState): AppState {
   const withColors = migratePeriodLabels(
-    migratePeopleColors(migrateCheckedShopping(state)),
+    migratePeopleColors(
+      migrateCheckedShopping(
+        migratePackageProducts(migrateFavoriteRecipes(state)),
+      ),
+    ),
   );
   if (!withColors.plan) return withColors;
   if (

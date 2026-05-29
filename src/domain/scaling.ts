@@ -1,53 +1,69 @@
-import { MEAL_BUDGETS, DIET_MACRO_SPLITS, PORTION_MIN, PORTION_MAX } from '../data/constants';
-import { macrosFromIngredient, recipeMacrosFromIngredients } from './nutrition';
+import { DIET_MACRO_SPLITS } from '../data/constants';
+import {
+  batchMacros,
+  personCalorieShare,
+  personMealCalorieTarget,
+} from './batch';
 import type { Person, Recipe, PersonMacros, DailyTargets } from './types';
 
-function referenceKcal(recipe: Recipe): number {
-  const fromIngredients = recipeMacrosFromIngredients(recipe);
-  return fromIngredients?.kcal ?? recipe.kcal;
-}
-
-export function personScale(person: Person, recipe: Recipe): number {
-  const mealBudget = MEAL_BUDGETS[recipe.meal] * person.cals;
-  const baseKcal = referenceKcal(recipe);
-  const raw = mealBudget / baseKcal;
-  return Math.min(PORTION_MAX, Math.max(PORTION_MIN, raw));
-}
-
-export function personMacros(person: Person, recipe: Recipe): PersonMacros {
-  const factor = personScale(person, recipe);
-  const parts: DailyTargets[] = [];
-
-  for (const ing of recipe.ingredients) {
-    const m = macrosFromIngredient(ing, ing.amount * factor);
-    if (m) parts.push(m);
+function scaleMacrosToKcal(
+  macros: DailyTargets,
+  targetKcal: number,
+): DailyTargets {
+  if (targetKcal <= 0) return macros;
+  if (macros.kcal <= 0) {
+    return { kcal: Math.round(targetKcal), p: 0, c: 0, f: 0 };
   }
+  const factor = targetKcal / macros.kcal;
+  return {
+    kcal: Math.round(targetKcal),
+    p: Math.round(macros.p * factor),
+    c: Math.round(macros.c * factor),
+    f: Math.round(macros.f * factor),
+  };
+}
 
-  if (parts.length === recipe.ingredients.length) {
-    const total = parts.reduce(
-      (acc, m) => ({
-        kcal: acc.kcal + m.kcal,
-        p: acc.p + m.p,
-        c: acc.c + m.c,
-        f: acc.f + m.f,
-      }),
-      { kcal: 0, p: 0, c: 0, f: 0 },
-    );
+export function personMacros(
+  person: Person,
+  recipe: Recipe,
+  people: Person[],
+  days: number,
+): PersonMacros {
+  const share = personCalorieShare(person, people, recipe.meal);
+  const targetMeal = personMealCalorieTarget(person, recipe.meal);
+  const batch = batchMacros(recipe, people, days);
+
+  if (batch && days > 0) {
+    const raw: DailyTargets = {
+      kcal: (batch.kcal * share) / days,
+      p: (batch.p * share) / days,
+      c: (batch.c * share) / days,
+      f: (batch.f * share) / days,
+    };
+    const scaled = scaleMacrosToKcal(raw, targetMeal);
     return {
-      factor,
-      kcal: Math.round(total.kcal),
-      p: Math.round(total.p),
-      c: Math.round(total.c),
-      f: Math.round(total.f),
+      factor: share,
+      kcal: scaled.kcal,
+      p: scaled.p,
+      c: scaled.c,
+      f: scaled.f,
     };
   }
 
+  const d = Math.max(days, 1);
+  const raw: DailyTargets = {
+    kcal: (recipe.kcal * share) / d,
+    p: (recipe.p * share) / d,
+    c: (recipe.c * share) / d,
+    f: (recipe.f * share) / d,
+  };
+  const scaled = scaleMacrosToKcal(raw, targetMeal);
   return {
-    factor,
-    kcal: Math.round(recipe.kcal * factor),
-    p: Math.round(recipe.p * factor),
-    c: Math.round(recipe.c * factor),
-    f: Math.round(recipe.f * factor),
+    factor: share,
+    kcal: scaled.kcal,
+    p: scaled.p,
+    c: scaled.c,
+    f: scaled.f,
   };
 }
 

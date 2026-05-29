@@ -5,20 +5,31 @@ import {
   ui,
   unitLabel,
 } from '../i18n';
-import type { Unit } from '../domain/types';
+import type { ShoppingItem } from '../domain/types';
 import { useApp } from '../state/AppContext';
 
-function formatShoppingQty(
-  qty: number,
-  unit: Unit,
-  qtyGrams: number | null,
-): string {
+function formatShoppingQty(item: ShoppingItem): string {
+  const { qty, unit, qtyGrams } = item;
   const g = unitLabel('g');
+  let base: string;
   if (qtyGrams !== null) {
-    if (unit === 'g' || unit === 'ml') return `${qtyGrams} ${g}`;
-    return `${qty} ${unitLabel(unit)} (${qtyGrams} ${g})`;
+    if (unit === 'g' || unit === 'ml') base = `${qtyGrams} ${g}`;
+    else base = `${qty} ${unitLabel(unit)} (${qtyGrams} ${g})`;
+  } else {
+    base = `${qty} ${unitLabel(unit)}`;
   }
-  return `${qty} ${unitLabel(unit)}`;
+  if (
+    item.packageCount &&
+    item.packageSize !== undefined &&
+    item.packageUnit
+  ) {
+    return `${base} · ${ui.shoppingPackageNote(
+      item.packageCount,
+      item.packageSize,
+      unitLabel(item.packageUnit),
+    )}`;
+  }
+  return base;
 }
 
 export function ShoppingTab() {
@@ -34,7 +45,11 @@ export function ShoppingTab() {
     );
   }
 
-  const items = aggregateShopping(state.plan, state.people);
+  const items = aggregateShopping(
+    state.plan,
+    state.people,
+    state.packageProducts,
+  );
   const groups = groupShoppingByCategory(items);
   const n = state.people.length;
 
@@ -86,7 +101,7 @@ export function ShoppingTab() {
                           checked ? 'text-text-success' : 'text-text-secondary'
                         }`}
                       >
-                        {formatShoppingQty(item.qty, item.unit, item.qtyGrams)}
+                        {formatShoppingQty(item)}
                       </span>
                     </label>
                   </li>

@@ -46,7 +46,15 @@ function CompactMacroBar({
   );
 }
 
-function PersonIntake({ person, plan }: { person: Person; plan: Plan | null }) {
+function PersonIntake({
+  person,
+  plan,
+  people,
+}: {
+  person: Person;
+  plan: Plan | null;
+  people: Person[];
+}) {
   const target = dailyTargetFor(person);
   const colors = personColorClasses(person.colorSlot);
 
@@ -59,7 +67,7 @@ function PersonIntake({ person, plan }: { person: Person; plan: Plan | null }) {
     );
   }
 
-  const actual = weeklyAverageFor(person, plan);
+  const actual = weeklyAverageFor(person, plan, people);
 
   return (
     <div className="flex gap-1.5">
@@ -114,10 +122,18 @@ export function DailyIntakeCard() {
                 <div className="mb-2">
                   <PersonLabel person={person} />
                 </div>
-                <PersonIntake person={person} plan={state.plan} />
+                <PersonIntake
+                  person={person}
+                  plan={state.plan}
+                  people={state.people}
+                />
               </>
             ) : (
-              <PersonIntake person={person} plan={null} />
+              <PersonIntake
+                person={person}
+                plan={null}
+                people={state.people}
+              />
             )}
           </div>
         ))}

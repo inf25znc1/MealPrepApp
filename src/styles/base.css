@@ -34,3 +34,9 @@
 body {
   @apply min-h-svh font-sans antialiased text-text-primary bg-bg-secondary;
 }
+
+@layer components {
+  .btn-primary {
+    @apply flex items-center justify-center gap-2 rounded-lg bg-text-primary text-sm font-medium text-bg-primary disabled:opacity-60;
+  }
+}
